@@ -5,7 +5,6 @@
 #include <iostream>
 
 
-//don't do this, this is just an example
 SDL_Renderer* renderer;
 SDL_Window* window;
 bool isRunning;
@@ -15,8 +14,8 @@ void update();
 void render();
 void loadImage(std::string IMG_PATH);
 
-//please don't put all your code in main like I did.
-int main() {
+int main() 
+{
 
 	fullscreen = false;
 	int flags = 0;
@@ -44,7 +43,8 @@ int main() {
 
 	Uint32 lastUpdate = SDL_GetTicks();
 
-	while (isRunning) {
+	while (isRunning) 
+	{
 		// for physics loop
 		Uint32 current = SDL_GetTicks();
 		float dt = (current - lastUpdate) / 1000.0f;
@@ -58,21 +58,21 @@ int main() {
 
 	//frees memory associated with renderer and window
 	SDL_DestroyRenderer(renderer);
-	SDL_DestroyWindow(window);	//error here
+	SDL_DestroyWindow(window);
 	SDL_Quit();
 
 
 	return 0;
 }
 
-//handles any events that SDL noticed.
-void handleEvents() {
-	//the only event we'll check is the  SDL_QUIT event.
+void handleEvents() 
+{
 	SDL_Event event;
 	SDL_PollEvent(&event);
 
 
-	switch (event.type) {
+	switch (event.type) 
+	{
 	case SDL_QUIT:
 		isRunning = false;
 		break;
@@ -81,29 +81,16 @@ void handleEvents() {
 	}
 }
 
-//simple render function
-void render() {
+void render() 
+{
 	SDL_SetRenderDrawColor(renderer, 121, 121, 121, 255);
 	SDL_RenderClear(renderer);
 
-	//your stuff to render would typically go here.
 	SDL_RenderPresent(renderer);
 }
 
 //simple update function
-void update() {
-	//if things could update the code would go in here.
-}
-
-
-void loadImage(std::string IMG_PATH)
+void update() 
 {
-	//SDL_Texture* img = NULL;
 
-	//// load our image
-	//img = IMG_LoadTexture(renderer, IMG_PATH);
-	//SDL_QueryTexture(img, NULL, NULL, &w, &h); // get the width and height of the texture
-	//// put the location where we want the texture to be drawn into a rectangle
-	//// I'm also scaling the texture 2x simply by setting the width and height
-	//SDL_Rect texr; texr.x = WIDTH / 2; texr.y = HEIGHT / 2; texr.w = w * 2; texr.h = h * 2;
 }
