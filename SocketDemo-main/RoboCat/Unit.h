@@ -1,5 +1,6 @@
 #pragma once
-
+#include "Color.h"
+#include "SDL.h"
 
 struct Vector2
 {
@@ -15,6 +16,10 @@ class Unit
 private:
 
 	Vector2 position;
+	Vector2 size; // width + height
+	Color color;
+
+	SDL_Rect rect;
 
 	// 0 - square, 1 - vRect, 2 - hRect
 	int type;
@@ -24,16 +29,49 @@ public:
 	Unit::Unit()
 	{
 		position = Vector2(0, 0);
+		size = Vector2(1, 1);
 		type = 0;
+
+		initRect();
 	}
 
-	Unit::Unit(Vector2 pos, int t)
+	Unit::Unit(Vector2 pos, Vector2 s, int t, Color col)
 	{
 		position = pos;
+		size = s;
 		type = t;
+		color = col;
+
+		initRect();
+	}
+
+	void initRect()
+	{
+		rect.x = position.x;
+		rect.y = position.y;
+		rect.w = size.x;
+		rect.h = size.y;
 	}
 
 	Vector2 getPosition() { return position; };
-	void setPosition(Vector2 pos) { position = pos; };
+	void setPosition(Vector2 pos) { position = pos; rect.x = position.x; rect.y = position.y; };
 	int getType() { return type; };
+	SDL_Rect getRect() { return rect; };
+
+	void update(float dt)
+	{
+		switch (type)
+		{
+		case 0:
+			// square - cycle through colors
+			color.incrementColor();
+			break;
+		case 1:
+			// vRect - fall
+			break;
+		case 2:
+			// hRect - teleport
+			break;
+		}
+	}
 };
