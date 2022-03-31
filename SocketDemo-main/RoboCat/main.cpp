@@ -42,10 +42,18 @@ int main() {
 
 	}
 
+	Uint32 lastUpdate = SDL_GetTicks();
+
 	while (isRunning) {
+		// for physics loop
+		Uint32 current = SDL_GetTicks();
+		float dt = (current - lastUpdate) / 1000.0f;
+
 		handleEvents();
 		update();
 		render();
+
+		lastUpdate = current;
 	}
 
 	//frees memory associated with renderer and window
