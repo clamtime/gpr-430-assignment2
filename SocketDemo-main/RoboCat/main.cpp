@@ -85,8 +85,10 @@ void render()
 {
 	SDL_SetRenderDrawColor(renderer, 121, 121, 121, 255);
 	SDL_RenderClear(renderer);
-
 	SDL_RenderPresent(renderer);
+
+	// render units here
+
 }
 
 //simple update function
