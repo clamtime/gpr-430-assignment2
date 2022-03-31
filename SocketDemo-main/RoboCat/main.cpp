@@ -1,6 +1,7 @@
 #include <RoboCatPCH.h>
 #include "SDL.h"
 #include <SDL_image.h>
+#include "Unit.h"
 #undef main
 #include <iostream>
 
@@ -9,10 +10,28 @@ SDL_Renderer* renderer;
 SDL_Window* window;
 bool isRunning;
 bool fullscreen;
+Color color0, color1, color2;
+Unit unit0, unit1, unit2;
+
 void handleEvents();
-void update();
+void update(float dt);
 void render();
-void loadImage(std::string IMG_PATH);
+//void loadImage(std::string IMG_PATH);
+
+#define TICK_INTERVAL    30
+
+static Uint32 next_time;
+
+Uint32 time_left(void)
+{
+	Uint32 now;
+
+	now = SDL_GetTicks();
+	if (next_time <= now)
+		return 0;
+	else
+		return next_time - now;
+}
 
 int main() 
 {
@@ -43,6 +62,16 @@ int main()
 
 	Uint32 lastUpdate = SDL_GetTicks();
 
+	// init colors
+	color0 = Color(200, 75, 60, 255);
+	color1 = Color(61, 226, 255, 255);
+	color2 = Color(155, 132, 245, 255);
+
+	// init units
+	unit0 = Unit(Vector2(100, 100), Vector2(75, 75), 0, color0);
+	unit1 = Unit(Vector2(250, 250), Vector2(40, 70), 1, color1);
+	unit2 = Unit(Vector2(50, 250), Vector2(70, 40), 2, color2);
+
 	while (isRunning) 
 	{
 		// for physics loop
@@ -50,9 +79,11 @@ int main()
 		float dt = (current - lastUpdate) / 1000.0f;
 
 		handleEvents();
-		update();
+		update(dt);
 		render();
 
+		SDL_Delay(time_left());
+		next_time += TICK_INTERVAL;
 		lastUpdate = current;
 	}
 
@@ -88,11 +119,18 @@ void render()
 	SDL_RenderPresent(renderer);
 
 	// render units here
-
+	unit0.render(renderer);
+	unit1.render(renderer);
+	unit2.render(renderer);
 }
 
 //simple update function
-void update() 
+void update(float dt) 
 {
+	int w, h;
+	SDL_GetWindowSize(window, &w, &h);
 
+	unit0.update(dt, Vector2(w, h));
+	unit1.update(dt, Vector2(w, h));
+	unit2.update(dt, Vector2(w, h));
 }

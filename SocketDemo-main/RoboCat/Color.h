@@ -3,7 +3,20 @@
 
 struct Color
 {
-	Uint8 r, b, g, a = 255;
+	Uint8 r, g, b, a = 255;
+
+	Color::Color()
+	{
+		r = g = b = a = 255;
+	}
+
+	Color::Color(Uint8 x, Uint8 y, Uint8 z, Uint8 w)
+	{
+		r = x;
+		g = y;
+		b = z;
+		a = w;
+	}
 
 	void incrementColor(Uint8 amt = 1)
 	{
@@ -11,11 +24,13 @@ struct Color
 		if (r > 255)
 			r = 0;
 
-		g += (amt * 2);
+		g += amt;
+		//g += (amt * 2);
 		if (g > 255)
 			g = 0;
 
-		b += (amt + 2);
+		b += amt;
+		//b += (amt + 2);
 		if (b > 255)
 			b = 0;
 	}
