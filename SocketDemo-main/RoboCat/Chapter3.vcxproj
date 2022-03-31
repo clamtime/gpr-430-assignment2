@@ -388,6 +388,7 @@
     <ClCompile Include="Src\SocketUtil.cpp" />
     <ClCompile Include="Src\StringUtils.cpp" />
     <ClCompile Include="Src\TCPSocket.cpp" />
+    <ClInclude Include="TCPHandler.h" />
     <ClInclude Include="Unit.h" />
   </ItemGroup>
   <ItemGroup>

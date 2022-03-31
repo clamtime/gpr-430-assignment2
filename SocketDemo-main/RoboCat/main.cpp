@@ -4,7 +4,11 @@
 #include "Unit.h"
 #undef main
 #include <iostream>
+#include <thread>
 
+const int SEND_PORT = 1000, RECV_PORT = 2000;
+TCPSocketPtr sendSocket = SocketUtil::CreateTCPSocket(SocketAddressFamily::INET), 
+		     recvSocket = SocketUtil::CreateTCPSocket(SocketAddressFamily::INET);
 
 SDL_Renderer* renderer;
 SDL_Window* window;
@@ -31,6 +35,70 @@ Uint32 time_left(void)
 		return 0;
 	else
 		return next_time - now;
+}
+
+void initSockets()
+{
+	SocketAddressPtr listenAddress = SocketAddressFactory::CreateIPv4FromString("127.0.0.1:" + SEND_PORT);
+	if (listenAddress == nullptr)
+	{
+		SocketUtil::ReportError("Creating listen address");
+		ExitProcess(1);
+	}
+
+	if (sendSocket->Bind(*listenAddress) != NO_ERROR)
+	{
+		SocketUtil::ReportError("Binding listening socket");
+		// This doesn't block!
+		ExitProcess(1);
+	}
+
+	if (sendSocket->Listen() != NO_ERROR)
+	{
+		SocketUtil::ReportError("Listening on listening socket");
+		ExitProcess(1);
+	}
+
+	LOG("%s", "Listening on socket");
+
+	// Accept() - Accept on socket -> Blocking; Waits for incoming connection and completes TCP handshake
+
+	LOG("%s", "Waiting to accept connections...");
+	SocketAddress incomingAddress;
+	TCPSocketPtr connSocket = sendSocket->Accept(incomingAddress);
+	while (connSocket == nullptr)
+	{
+		connSocket = sendSocket->Accept(incomingAddress);
+		// SocketUtil::ReportError("Accepting connection");
+		// ExitProcess(1);
+	}
+
+	bool quit = false;
+	std::thread receiveThread([&]() { // don't use [&] :)
+		while (!quit) // Need to add a quit here to have it really exit!
+		{
+			char buffer[4096];
+			int32_t bytesReceived = connSocket->Receive(buffer, 4096);
+			if (bytesReceived == 0)
+			{
+				// handle disconnect
+			}
+			if (bytesReceived < 0)
+			{
+				SocketUtil::ReportError("Receiving");
+				return;
+			}
+
+			std::string receivedMsg(buffer, bytesReceived);
+			LOG("Received message from %s: %s", incomingAddress.ToString().c_str(), receivedMsg.c_str());
+		}
+		});
+
+	std::cout << "Press enter to exit at any time!\n";
+	std::cin.get();
+	quit = true;
+	connSocket->~TCPSocket(); // Forcibly close socket (shouldn't call destructors like this -- make a new function for it!
+	receiveThread.join();
 }
 
 int main() 
