@@ -6,12 +6,12 @@
 #include <iostream>
 #include <thread>
 
-const std::string PORT = "8000";
+const std::string SENDPORT = "8000", RECVPORT = "9000";
 //TCPSocketPtr sendSocket = SocketUtil::CreateTCPSocket(SocketAddressFamily::INET), 
 //		     recvSocket = SocketUtil::CreateTCPSocket(SocketAddressFamily::INET);
 
-SDL_Renderer* renderer;
-SDL_Window* window;
+SDL_Renderer* rendererP1, *rendererP2, *rendererServer;
+SDL_Window* windowP1, *windowP2, *windowServer;
 bool isRunning;
 bool fullscreen;
 Color color0, color1, color2;
@@ -288,7 +288,7 @@ void DoTcpClient(std::string port)
 
 	while (true)
 	{
-		LOG("%s", "Client sendin da message");
+		LOG("%s", "Client sending message");
 		std::string msg("Hello server! How are you?");
 		clientSocket->Send(msg.c_str(), msg.length());
 		std::this_thread::sleep_for(std::chrono::seconds(1));
@@ -312,14 +312,14 @@ int main(int argc, const char** argv, const char** argz)
 
 	SocketUtil::StaticInit();
 	OutputWindow servWin, clientWin;
-	std::thread st([&servWin]()
-		{
-			DoTcpServer();
-		});
-	std::thread ct([&servWin]()
-		{
-			DoTcpClient("1050");
-		});
+	//std::thread st([&servWin]()
+	//	{
+	//		DoTcpServer();
+	//	});
+	//std::thread ct([&servWin]()
+	//	{
+	//		DoTcpClient(SENDPORT);
+	//	});
 
 	
 	fullscreen = false;
@@ -331,16 +331,42 @@ int main(int argc, const char** argv, const char** argz)
 	if (SDL_Init(SDL_INIT_EVERYTHING) == 0) {
 		std::cout << "Subsystems Initialized!\n";
 
-		window = SDL_CreateWindow("Test Window", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 500, 500, flags);
-		if (window) {
+		windowP1 = SDL_CreateWindow("P1 Window", 100, SDL_WINDOWPOS_CENTERED, 500, 500, flags);
+		if (windowP1) {
 			std::cout << "Window Created!\n";
-			SDL_SetWindowMinimumSize(window, 100, 100);
+			SDL_SetWindowMinimumSize(windowP1, 100, 100);
 		}
-		renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
-		if (renderer) {
-			SDL_SetRenderDrawColor(renderer, 121, 121, 121, 255);
+		rendererP1 = SDL_CreateRenderer(windowP1, -1, SDL_RENDERER_ACCELERATED);
+		if (rendererP1) {
+			SDL_SetRenderDrawColor(rendererP1, 121, 121, 121, 255);
 			std::cout << "Renderer created!\n";
-			SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND);
+			SDL_SetRenderDrawBlendMode(rendererP1, SDL_BLENDMODE_BLEND);
+			isRunning = true;
+		}
+
+		windowP2 = SDL_CreateWindow("P2 Window", 1300, SDL_WINDOWPOS_CENTERED, 500, 500, flags);
+		if (windowP2) {
+			std::cout << "Window Created!\n";
+			SDL_SetWindowMinimumSize(windowP2, 100, 100);
+		}
+		rendererP2 = SDL_CreateRenderer(windowP2, -1, SDL_RENDERER_ACCELERATED);
+		if (rendererP2) {
+			SDL_SetRenderDrawColor(rendererP2, 121, 121, 121, 255);
+			std::cout << "Renderer created!\n";
+			SDL_SetRenderDrawBlendMode(rendererP2, SDL_BLENDMODE_BLEND);
+			isRunning = true;
+		}
+
+		windowServer = SDL_CreateWindow("Server Window", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 500, 500, flags);
+		if (windowServer) {
+			std::cout << "Window Created!\n";
+			SDL_SetWindowMinimumSize(windowServer, 100, 100);
+		}
+		rendererServer = SDL_CreateRenderer(windowServer, -1, SDL_RENDERER_ACCELERATED);
+		if (rendererServer) {
+			SDL_SetRenderDrawColor(rendererServer, 121, 121, 121, 255);
+			std::cout << "Renderer created!\n";
+			SDL_SetRenderDrawBlendMode(rendererServer, SDL_BLENDMODE_BLEND);
 			isRunning = true;
 		}
 
@@ -374,8 +400,12 @@ int main(int argc, const char** argv, const char** argz)
 	}
 
 	//frees memory associated with renderer and window
-	SDL_DestroyRenderer(renderer);
-	SDL_DestroyWindow(window);
+	SDL_DestroyRenderer(rendererP1);
+	SDL_DestroyRenderer(rendererP2);
+	SDL_DestroyRenderer(rendererServer);
+	SDL_DestroyWindow(windowP1);
+	SDL_DestroyWindow(windowP2);
+	SDL_DestroyWindow(windowServer);
 	SDL_Quit();
 
 
@@ -400,21 +430,21 @@ void handleEvents()
 
 void render() 
 {
-	SDL_SetRenderDrawColor(renderer, 121, 121, 121, 255);
-	SDL_RenderClear(renderer);
-	SDL_RenderPresent(renderer);
+	SDL_SetRenderDrawColor(rendererServer, 121, 121, 121, 255);
+	SDL_RenderClear(rendererServer);
+	SDL_RenderPresent(rendererServer);
 
 	// render units here
-	unit0.render(renderer);
-	unit1.render(renderer);
-	unit2.render(renderer);
+	unit0.render(rendererServer);
+	unit1.render(rendererServer);
+	unit2.render(rendererServer);
 }
 
 //simple update function
 void update(float dt) 
 {
 	int w, h;
-	SDL_GetWindowSize(window, &w, &h);
+	SDL_GetWindowSize(windowServer, &w, &h);
 
 	std::string msg("Hello server! DT is: " + std::to_string(dt));
 	//sendSocket->Send(msg.c_str(), msg.length());
