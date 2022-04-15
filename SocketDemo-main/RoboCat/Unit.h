@@ -23,6 +23,7 @@ private:
 
 	// 0 - square, 1 - vRect, 2 - hRect
 	int type;
+	int unitID;
 
 	bool right;
 
@@ -38,12 +39,13 @@ public:
 		right = true;
 	}
 
-	Unit::Unit(Vector2 pos, Vector2 s, int t, Color col)
+	Unit::Unit(Vector2 pos, Vector2 s, int t, Color col, int id)
 	{
 		position = pos;
 		size = s;
 		type = t;
 		color = col;
+		unitID = id;
 
 		initRect();
 		right = true;
@@ -62,51 +64,7 @@ public:
 	int getType() { return type; };
 	SDL_Rect getRect() { return rect; };
 
-	void update(float dt, Vector2 screen)
-	{
-		int gravity = 4;
+	void update(float dt, Vector2 screen);
 
-		switch (type)
-		{
-		case 0:
-			// square - cycle through colors
-			color.incrementColor();
-			break;
-
-		case 1:
-			// vRect - fall
-			if (position.y >= screen.y)
-			{
-				position.y = -size.y;
-			}
-			position.y += gravity;
-			rect.y = position.y;
-			break;
-
-		case 2:
-			// hRect - teleport
-			if (position.x <= 0)
-				right = true;
-			else if (position.x + size.x>= screen.x)
-				right = false;
-
-			if (right)
-				position.x += 3;
-			else
-				position.x -= 3;
-
-			rect.x = position.x;
-
-			break;
-		}
-	}
-
-	void render(SDL_Renderer* renderer)
-	{
-		SDL_SetRenderDrawColor(renderer, color.r, color.g, color.b, color.a);
-		// draw rect
-		SDL_RenderFillRect(renderer, &rect);
-
-		SDL_RenderPresent(renderer);
-	}
+	void render(SDL_Renderer* renderer);
 };

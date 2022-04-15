@@ -354,9 +354,9 @@ int main(int argc, const char** argv, const char** argz)
 	color2 = Color(155, 132, 245, 255);
 
 	// init units
-	unit0 = Unit(Vector2(100, 100), Vector2(75, 75), 0, color0);
+	/*unit0 = Unit(Vector2(100, 100), Vector2(75, 75), 0, color0);
 	unit1 = Unit(Vector2(250, 250), Vector2(40, 70), 1, color1);
-	unit2 = Unit(Vector2(50, 250), Vector2(70, 40), 2, color2);
+	unit2 = Unit(Vector2(50, 250), Vector2(70, 40), 2, color2);*/
 
 	while (isRunning) 
 	{
