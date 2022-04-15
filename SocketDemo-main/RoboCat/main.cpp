@@ -6,9 +6,11 @@
 #include <iostream>
 #include <thread>
 
-const std::string SENDPORT = "8000", RECVPORT = "9000";
+const std::string SENDPORT = "8010", RECVPORT = "9000";
 //TCPSocketPtr sendSocket = SocketUtil::CreateTCPSocket(SocketAddressFamily::INET), 
 //		     recvSocket = SocketUtil::CreateTCPSocket(SocketAddressFamily::INET);
+
+TCPSocketPtr clientSocket;
 
 SDL_Renderer* rendererP1, *rendererP2, *rendererServer;
 SDL_Window* windowP1, *windowP2, *windowServer;
@@ -241,7 +243,7 @@ void DoTcpServer()
 void DoTcpClient(std::string port)
 {
 	// Create socket
-	TCPSocketPtr clientSocket = SocketUtil::CreateTCPSocket(SocketAddressFamily::INET);
+	clientSocket = SocketUtil::CreateTCPSocket(SocketAddressFamily::INET);
 	if (clientSocket == nullptr)
 	{
 		SocketUtil::ReportError("Creating client socket");
@@ -286,13 +288,13 @@ void DoTcpClient(std::string port)
 
 	LOG("%s", "Connected to server!");
 
-	while (true)
-	{
-		LOG("%s", "Client sending message");
-		std::string msg("Hello server! How are you?");
-		clientSocket->Send(msg.c_str(), msg.length());
-		std::this_thread::sleep_for(std::chrono::seconds(1));
-	}
+	//while (true)
+	//{
+	//	LOG("%s", "Client sending message");
+	//	std::string msg("Hello server! How are you?");
+	//	clientSocket->Send(msg.c_str(), msg.length());
+	//	std::this_thread::sleep_for(std::chrono::seconds(1));
+	//}
 }
 
 #if _WIN32
@@ -312,15 +314,20 @@ int main(int argc, const char** argv, const char** argz)
 
 	SocketUtil::StaticInit();
 	OutputWindow servWin, clientWin;
-	//std::thread st([&servWin]()
-	//	{
-	//		DoTcpServer();
-	//	});
-	//std::thread ct([&servWin]()
-	//	{
-	//		DoTcpClient(SENDPORT);
-	//	});
-
+	std::thread st([&servWin]()
+		{
+			DoTcpServer();
+		});
+	std::thread player1Client([&servWin]()
+		{
+			DoTcpClient(SENDPORT);
+			//DoTcpServer(RECVPORT);
+		});
+	std::thread player2Client([&servWin]()
+		{
+			//DoTcpClient(SENDPORT);
+			//DoTcpServer(RECVPORT);
+		});
 	
 	fullscreen = false;
 	int flags = 0;
@@ -447,8 +454,8 @@ void update(float dt)
 	SDL_GetWindowSize(windowServer, &w, &h);
 
 	std::string msg("Hello server! DT is: " + std::to_string(dt));
-	//sendSocket->Send(msg.c_str(), msg.length());
-	std::this_thread::sleep_for(std::chrono::seconds(1));
+	//clientSocket->Send(msg.c_str(), msg.length());
+	//std::this_thread::sleep_for(std::chrono::seconds(1));
 
 	unit0.update(dt, Vector2(w, h));
 	unit1.update(dt, Vector2(w, h));
