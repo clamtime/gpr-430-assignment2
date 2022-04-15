@@ -2,6 +2,7 @@
 #include "SDL.h"
 #include <SDL_image.h>
 #include "Unit.h"
+#include "UnitManager.h"
 #undef main
 #include <iostream>
 #include <thread>
@@ -18,6 +19,7 @@ bool isRunning;
 bool fullscreen;
 Color color0, color1, color2;
 Unit unit0, unit1, unit2;
+UnitManager unitManager;
 
 void handleEvents();
 void update(float dt);
@@ -391,6 +393,17 @@ int main(int argc, const char** argv, const char** argz)
 	unit1 = Unit(Vector2(250, 250), Vector2(40, 70), 1, color1);
 	unit2 = Unit(Vector2(50, 250), Vector2(70, 40), 2, color2);*/
 
+	// UnitManager
+
+
+	unitManager = UnitManager();
+
+	int w, h;
+	SDL_GetWindowSize(windowServer, &w, &h);
+	unitManager.createSquare(Vector2(w, h));
+	unitManager.createRectV(Vector2(w, h));
+	unitManager.createRectH(Vector2(w, h));
+
 	while (isRunning) 
 	{
 		// for physics loop
@@ -442,9 +455,10 @@ void render()
 	SDL_RenderPresent(rendererServer);
 
 	// render units here
-	unit0.render(rendererServer);
+	unitManager.RenderUnits(rendererServer);
+	/*unit0.render(rendererServer);
 	unit1.render(rendererServer);
-	unit2.render(rendererServer);
+	unit2.render(rendererServer);*/
 }
 
 //simple update function
@@ -457,7 +471,8 @@ void update(float dt)
 	//clientSocket->Send(msg.c_str(), msg.length());
 	//std::this_thread::sleep_for(std::chrono::seconds(1));
 
-	unit0.update(dt, Vector2(w, h));
+	unitManager.updateUnits(dt, Vector2(w, h));
+	/*unit0.update(dt, Vector2(w, h));
 	unit1.update(dt, Vector2(w, h));
-	unit2.update(dt, Vector2(w, h));
+	unit2.update(dt, Vector2(w, h));*/
 }

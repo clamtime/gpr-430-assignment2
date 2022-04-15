@@ -370,6 +370,8 @@
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Unit.cpp" />
+    <ClCompile Include="UnitManager.cpp" />
     <ClInclude Include="Color.h" />
     <ClInclude Include="Inc\OutputWindow.h" />
     <ClInclude Include="Inc\SocketAddress.h" />
@@ -390,6 +392,7 @@
     <ClCompile Include="Src\TCPSocket.cpp" />
     <ClInclude Include="TCPHandler.h" />
     <ClInclude Include="Unit.h" />
+    <ClInclude Include="UnitManager.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Src\RoboCatPCH.cpp">
