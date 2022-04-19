@@ -6,6 +6,7 @@
 #undef main
 #include <iostream>
 #include <thread>
+#include "PlayerUser.h"
 
 const std::string SENDPORT = "8010", RECVPORT = "9000";
 //TCPSocketPtr sendSocket = SocketUtil::CreateTCPSocket(SocketAddressFamily::INET), 
@@ -15,11 +16,13 @@ TCPSocketPtr clientSocket;
 
 SDL_Renderer* rendererP1, *rendererP2, *rendererServer;
 SDL_Window* windowP1, *windowP2, *windowServer;
+
+PlayerUser *p1, *p2, *serverPlayer;
+
 bool isRunning;
 bool fullscreen;
 Color color0, color1, color2;
 Unit unit0, unit1, unit2;
-UnitManager unitManager;
 
 void handleEvents();
 void update(float dt);
@@ -337,49 +340,11 @@ int main(int argc, const char** argv, const char** argz)
 	if (fullscreen) {
 		flags = flags | SDL_WINDOW_FULLSCREEN;
 	}
-	if (SDL_Init(SDL_INIT_EVERYTHING) == 0) {
-		std::cout << "Subsystems Initialized!\n";
+	
+	p1 = new PlayerUser(rendererP1, windowP1, flags, 1, 100);
+	p2 = new PlayerUser(rendererP2, windowP2, flags, 2, 1300);
+	serverPlayer = new PlayerUser(rendererServer, windowServer, flags, 0, 500);
 
-		windowP1 = SDL_CreateWindow("P1 Window", 100, SDL_WINDOWPOS_CENTERED, 500, 500, flags);
-		if (windowP1) {
-			std::cout << "Window Created!\n";
-			SDL_SetWindowMinimumSize(windowP1, 100, 100);
-		}
-		rendererP1 = SDL_CreateRenderer(windowP1, -1, SDL_RENDERER_ACCELERATED);
-		if (rendererP1) {
-			SDL_SetRenderDrawColor(rendererP1, 121, 121, 121, 255);
-			std::cout << "Renderer created!\n";
-			SDL_SetRenderDrawBlendMode(rendererP1, SDL_BLENDMODE_BLEND);
-			isRunning = true;
-		}
-
-		windowP2 = SDL_CreateWindow("P2 Window", 1300, SDL_WINDOWPOS_CENTERED, 500, 500, flags);
-		if (windowP2) {
-			std::cout << "Window Created!\n";
-			SDL_SetWindowMinimumSize(windowP2, 100, 100);
-		}
-		rendererP2 = SDL_CreateRenderer(windowP2, -1, SDL_RENDERER_ACCELERATED);
-		if (rendererP2) {
-			SDL_SetRenderDrawColor(rendererP2, 121, 121, 121, 255);
-			std::cout << "Renderer created!\n";
-			SDL_SetRenderDrawBlendMode(rendererP2, SDL_BLENDMODE_BLEND);
-			isRunning = true;
-		}
-
-		windowServer = SDL_CreateWindow("Server Window", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 500, 500, flags);
-		if (windowServer) {
-			std::cout << "Window Created!\n";
-			SDL_SetWindowMinimumSize(windowServer, 100, 100);
-		}
-		rendererServer = SDL_CreateRenderer(windowServer, -1, SDL_RENDERER_ACCELERATED);
-		if (rendererServer) {
-			SDL_SetRenderDrawColor(rendererServer, 121, 121, 121, 255);
-			std::cout << "Renderer created!\n";
-			SDL_SetRenderDrawBlendMode(rendererServer, SDL_BLENDMODE_BLEND);
-			isRunning = true;
-		}
-
-	}
 
 	Uint32 lastUpdate = SDL_GetTicks();
 
@@ -396,13 +361,13 @@ int main(int argc, const char** argv, const char** argz)
 	// UnitManager
 
 
-	unitManager = UnitManager();
-
 	int w, h;
-	SDL_GetWindowSize(windowServer, &w, &h);
-	unitManager.createSquare(Vector2(w, h));
-	unitManager.createRectV(Vector2(w, h));
-	unitManager.createRectH(Vector2(w, h));
+	SDL_GetWindowSize(serverPlayer->window, &w, &h);
+	serverPlayer->unitManager.createSquare(Vector2(w, h));
+	serverPlayer->unitManager.createRectV(Vector2(w, h));
+	serverPlayer->unitManager.createRectH(Vector2(w, h));
+
+	isRunning = true;
 
 	while (isRunning) 
 	{
@@ -420,14 +385,11 @@ int main(int argc, const char** argv, const char** argz)
 	}
 
 	//frees memory associated with renderer and window
-	SDL_DestroyRenderer(rendererP1);
-	SDL_DestroyRenderer(rendererP2);
-	SDL_DestroyRenderer(rendererServer);
-	SDL_DestroyWindow(windowP1);
-	SDL_DestroyWindow(windowP2);
-	SDL_DestroyWindow(windowServer);
-	SDL_Quit();
 
+	delete p1;
+	delete p2;
+	delete serverPlayer;
+	SocketUtil::CleanUp();
 
 	return 0;
 }
@@ -450,12 +412,12 @@ void handleEvents()
 
 void render() 
 {
-	SDL_SetRenderDrawColor(rendererServer, 121, 121, 121, 255);
-	SDL_RenderClear(rendererServer);
-	SDL_RenderPresent(rendererServer);
+	SDL_SetRenderDrawColor(serverPlayer->renderer, 121, 121, 121, 255);
+	SDL_RenderClear(serverPlayer->renderer);
+	SDL_RenderPresent(serverPlayer->renderer);
 
 	// render units here
-	unitManager.RenderUnits(rendererServer);
+	serverPlayer->unitManager.RenderUnits(rendererServer);
 	/*unit0.render(rendererServer);
 	unit1.render(rendererServer);
 	unit2.render(rendererServer);*/
@@ -465,13 +427,13 @@ void render()
 void update(float dt) 
 {
 	int w, h;
-	SDL_GetWindowSize(windowServer, &w, &h);
+	SDL_GetWindowSize(serverPlayer->window, &w, &h);
 
 	std::string msg("Hello server! DT is: " + std::to_string(dt));
 	//clientSocket->Send(msg.c_str(), msg.length());
 	//std::this_thread::sleep_for(std::chrono::seconds(1));
 
-	unitManager.updateUnits(dt, Vector2(w, h));
+	serverPlayer->unitManager.updateUnits(dt, Vector2(w, h));
 	/*unit0.update(dt, Vector2(w, h));
 	unit1.update(dt, Vector2(w, h));
 	unit2.update(dt, Vector2(w, h));*/

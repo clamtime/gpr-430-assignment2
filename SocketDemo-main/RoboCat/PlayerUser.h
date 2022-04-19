@@ -4,17 +4,21 @@
 #include <SDL.h>
 #include "UnitManager.h"
 
-class PlayerUser
+struct PlayerUser
 {
-private:
 	SDL_Renderer* renderer;
 	SDL_Window* window;
 	UnitManager unitManager;
 	int playerNumber;
+	std::string playerName;
 
-public:
+	TCPSocketPtr sendSocket, recvSocket;
+
 	PlayerUser();
-	PlayerUser(SDL_Renderer* _ren, SDL_Window* _win, UnitManager _um, int _flags, int _pnum, int _xpos);
+	PlayerUser(SDL_Renderer* _ren, SDL_Window* _win, int _flags, int _pnum, int _xpos);
 	~PlayerUser();
+
+	void InitTcpClient(std::string sendPort, std::string recvPort);
+	void InitTcpServer(std::string listenPort);
 };
 
