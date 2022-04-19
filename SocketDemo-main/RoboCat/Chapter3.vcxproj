@@ -370,6 +370,7 @@
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="PlayerUser.cpp" />
     <ClCompile Include="Unit.cpp" />
     <ClCompile Include="UnitManager.cpp" />
     <ClInclude Include="Color.h" />
@@ -390,6 +391,7 @@
     <ClCompile Include="Src\SocketUtil.cpp" />
     <ClCompile Include="Src\StringUtils.cpp" />
     <ClCompile Include="Src\TCPSocket.cpp" />
+    <ClInclude Include="PlayerUser.h" />
     <ClInclude Include="TCPHandler.h" />
     <ClInclude Include="Unit.h" />
     <ClInclude Include="UnitManager.h" />
