@@ -1,3 +1,4 @@
+#include "RoboCatPCH.h"
 #include "UnitManager.h"
 
 void UnitManager::createSquare(Vector2 screen)
@@ -65,4 +66,5 @@ void UnitManager::RenderUnits(SDL_Renderer* renderer)
 int UnitManager::GetRandInt(int min, int max)
 {
 	int r = std::rand() % max + min;
+	return r;
 }
