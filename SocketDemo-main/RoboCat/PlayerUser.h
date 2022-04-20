@@ -11,14 +11,19 @@ struct PlayerUser
 	UnitManager unitManager;
 	int playerNumber;
 	std::string playerName;
+	std::string SEPERATOR_TOKEN = "!";
+
 
 	TCPSocketPtr sendSocket, recvSocket;
 
 	PlayerUser();
-	PlayerUser(SDL_Renderer* _ren, SDL_Window* _win, int _flags, int _pnum, int _xpos);
+	PlayerUser(int _flags, int _pnum, int _xpos);
 	~PlayerUser();
 
-	void InitTcpClient(std::string sendPort, std::string recvPort);
-	void InitTcpServer(std::string listenPort);
-};
+	void initTcpClient(std::string sendPort, std::string recvPort);
+	void initTcpServer(std::string listenPort);
 
+	std::string packageUnitIntoString(int _id);
+	void decodeUnitString(std::string _unitString);
+	void recieveNewUnit(int _id, int _type, Vector2 _pos, Vector2 _size, Color _col);
+};

@@ -68,4 +68,8 @@ public:
 	void update(float dt, Vector2 screen);
 
 	void render(SDL_Renderer* renderer);
+
+	int getID() { return unitID; };
+	Vector2 getSize() { return size; };
+	Color getColor() { return color; };
 };

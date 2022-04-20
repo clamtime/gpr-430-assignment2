@@ -3,6 +3,20 @@
 #include <iostream>
 #include <thread>
 
+// FUNCTION FROM user704565 AT https://stackoverflow.com/a/16286297:
+std::vector<std::string> split(std::string str, std::string sep) {
+	char* cstr = const_cast<char*>(str.c_str());
+	char* current;
+	std::vector<std::string> arr;
+	current = strtok(cstr, sep.c_str());
+	while (current != NULL) {
+		arr.push_back(current);
+		current = strtok(NULL, sep.c_str());
+	}
+	return arr;
+}
+
+
 PlayerUser::PlayerUser()
 {
 	renderer	= nullptr;
@@ -10,9 +24,11 @@ PlayerUser::PlayerUser()
 	unitManager = UnitManager();
 }
 
-PlayerUser::PlayerUser(SDL_Renderer* _ren, SDL_Window* _win, int _flags, int _pnum, int _xpos)
+PlayerUser::PlayerUser(int _flags, int _pnum, int _xpos)
 {
 	unitManager = UnitManager();
+	sendSocket = SocketUtil::CreateTCPSocket(SocketAddressFamily::INET);
+	recvSocket = SocketUtil::CreateTCPSocket(SocketAddressFamily::INET);
 
 	playerNumber = _pnum;
 	if (SDL_Init(SDL_INIT_EVERYTHING) == 0) 
@@ -45,7 +61,7 @@ PlayerUser::~PlayerUser()
 	SDL_Quit();
 }
 
-void PlayerUser::InitTcpClient(std::string sendPort, std::string recvPort)
+void PlayerUser::initTcpClient(std::string sendPort, std::string recvPort)
 
 {
 	// Create socket
@@ -95,7 +111,7 @@ void PlayerUser::InitTcpClient(std::string sendPort, std::string recvPort)
 	LOG("%s", playerName + " Connected to server!");
 }
 
-void PlayerUser::InitTcpServer(std::string listenPort)
+void PlayerUser::initTcpServer(std::string listenPort)
 {
 	// Create socket
 	TCPSocketPtr listenSocket = SocketUtil::CreateTCPSocket(SocketAddressFamily::INET);
@@ -179,4 +195,53 @@ void PlayerUser::InitTcpServer(std::string listenPort)
 	quit = true;
 	connSocket->~TCPSocket(); // Forcibly close socket (shouldn't call destructors like this -- make a new function for it!
 	receiveThread.join();
+}
+
+std::string PlayerUser::packageUnitIntoString(int _id)
+{
+	std::string toReturn = "";
+	
+	Unit* temp = unitManager.getUnit(_id);
+	if (temp != nullptr)
+	{
+		Vector2 pos = temp->getPosition();
+		Vector2 size = temp->getSize();
+		Color col = temp->getColor();
+
+		toReturn =
+			std::to_string(temp->getID())   + SEPERATOR_TOKEN +
+			std::to_string(temp->getType()) + SEPERATOR_TOKEN +
+			std::to_string(pos.x)  + SEPERATOR_TOKEN +
+			std::to_string(pos.y)  + SEPERATOR_TOKEN +
+			std::to_string(size.x) + SEPERATOR_TOKEN +
+			std::to_string(size.y) + SEPERATOR_TOKEN +
+			std::to_string(col.r)  + SEPERATOR_TOKEN +
+			std::to_string(col.g)  + SEPERATOR_TOKEN +
+			std::to_string(col.b)  + SEPERATOR_TOKEN +
+			std::to_string(col.a);
+	}
+
+	return toReturn;
+}
+
+void PlayerUser::decodeUnitString(std::string _unitString)
+{
+	vector<std::string> splitUnitString;
+	splitUnitString = split(_unitString, SEPERATOR_TOKEN);
+
+	int _id = std::stoi(splitUnitString[0]);
+	int _type = std::stoi(splitUnitString[1]);
+	Vector2 _pos = Vector2(std::stoi(splitUnitString[2]), std::stoi(splitUnitString[3]));
+	Vector2 _size = Vector2(std::stoi(splitUnitString[4]), std::stoi(splitUnitString[5]));
+	Color _col = Color(std::stoi(splitUnitString[6]), std::stoi(splitUnitString[7]), std::stoi(splitUnitString[8]), std::stoi(splitUnitString[9]));
+	recieveNewUnit(_id, _type, _pos, _size, _col);
+}
+
+void PlayerUser::recieveNewUnit(int _id, int _type, Vector2 _pos, Vector2 _size, Color _col)
+{
+	// ensure unit does not exist locally
+	if (unitManager.getUnit(_id) == nullptr)
+	{
+		unitManager.createReceivedUnit(_pos, _size, _col, _type, _id);
+	}
 }
