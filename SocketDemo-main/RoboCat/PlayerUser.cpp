@@ -68,11 +68,11 @@ void PlayerUser::initTcpClient(std::string sendPort, std::string recvPort)
 	sendSocket = SocketUtil::CreateTCPSocket(SocketAddressFamily::INET);
 	if (sendSocket == nullptr)
 	{
-		SocketUtil::ReportError(("Creating " + playerName + " client socket").c_str());
+		SocketUtil::ReportError("Creating client socket");
 		ExitProcess(1);
 	}
 
-	LOG("%s", "Client " + playerName + " socket created");
+	LOG("%s", "Client socket created");
 
 	// Bind() - "Bind" socket -> tells OS we want to use a specific address
 
@@ -80,18 +80,18 @@ void PlayerUser::initTcpClient(std::string sendPort, std::string recvPort)
 	SocketAddressPtr clientAddress = SocketAddressFactory::CreateIPv4FromString(address.c_str());
 	if (clientAddress == nullptr)
 	{
-		SocketUtil::ReportError(("Creating " + playerName + " client address").c_str());
+		SocketUtil::ReportError("Creating client address");
 		ExitProcess(1);
 	}
 
 	if (sendSocket->Bind(*clientAddress) != NO_ERROR)
 	{
-		SocketUtil::ReportError(("Binding " + playerName + " client socket").c_str());
+		SocketUtil::ReportError("Binding client socket");
 		// This doesn't block!
 		ExitProcess(1);
 	}
 
-	LOG("%s", "Bound " + playerName + " client socket");
+	LOG("%s", "Bound client socket");
 
 	// Connect() -> Connect socket to remote host
 
@@ -108,7 +108,7 @@ void PlayerUser::initTcpClient(std::string sendPort, std::string recvPort)
 		ExitProcess(1);
 	}
 
-	LOG("%s", playerName + " Connected to server!");
+	LOG("%s", "Connected to server!");
 }
 
 void PlayerUser::initTcpServer(std::string listenPort)
@@ -117,7 +117,7 @@ void PlayerUser::initTcpServer(std::string listenPort)
 	TCPSocketPtr listenSocket = SocketUtil::CreateTCPSocket(SocketAddressFamily::INET);
 	if (listenSocket == nullptr)
 	{
-		SocketUtil::ReportError(("Creating " + playerName + " listening socket").c_str());
+		SocketUtil::ReportError("Creating listening socket");
 		ExitProcess(1);
 	}
 
@@ -130,7 +130,7 @@ void PlayerUser::initTcpServer(std::string listenPort)
 	SocketAddressPtr listenAddress = SocketAddressFactory::CreateIPv4FromString("127.0.0.1:"+ listenPort);
 	if (listenAddress == nullptr)
 	{
-		SocketUtil::ReportError(("Creating " + playerName + " listen address").c_str());
+		SocketUtil::ReportError("Creating listen address");
 		ExitProcess(1);
 	}
 
@@ -228,17 +228,36 @@ std::string PlayerUser::packageUnitIntoString(int _id)
 	return toReturn;
 }
 
-void PlayerUser::decodeUnitString(std::string _unitString)
+void PlayerUser::decodeUnitString(std::string _unitString, bool onlyPrint)
 {
 	vector<std::string> splitUnitString;
+
+	if (_unitString[0] == '$')
+		_unitString = _unitString.erase(0, 1);
 	splitUnitString = split(_unitString, SEPERATOR_TOKEN);
 
 	int _id = std::stoi(splitUnitString[0]);
 	int _type = std::stoi(splitUnitString[1]);
 	Vector2 _pos = Vector2(std::stoi(splitUnitString[2]), std::stoi(splitUnitString[3]));
 	Vector2 _size = Vector2(std::stoi(splitUnitString[4]), std::stoi(splitUnitString[5]));
-	Color _col = Color(std::stoi(splitUnitString[6]), std::stoi(splitUnitString[7]), std::stoi(splitUnitString[8]), std::stoi(splitUnitString[9]));
-	recieveNewUnit(_id, _type, _pos, _size, _col);
+	Color _col = Color(
+		(Uint8)std::stoi(splitUnitString[6]), 
+		(Uint8)std::stoi(splitUnitString[7]), 
+		(Uint8)std::stoi(splitUnitString[8]), 
+		(Uint8)std::stoi(splitUnitString[9]));
+	
+	if (!onlyPrint)
+		recieveNewUnit(_id, _type, _pos, _size, _col);
+	else
+	{
+		std::string str = "ID: " + std::to_string(_id) + '\n' + 
+			"Type: " + std::to_string(_type) + '\n' +
+			"Position: " + _pos.ToString() + '\n' +
+			"Size: " + _size.ToString() + '\n' +
+			"Color: " + _col.ToString() +'\n';
+
+		std::cout << str;
+	}
 }
 
 void PlayerUser::recieveNewUnit(int _id, int _type, Vector2 _pos, Vector2 _size, Color _col)

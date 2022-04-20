@@ -2,6 +2,7 @@
 #include <RoboCatPCH.h>
 #include "Color.h"
 #include "SDL.h"
+#include <ostream>
 
 struct Vector2
 {
@@ -10,6 +11,17 @@ struct Vector2
 
 	Vector2::Vector2() { x = 0; y = 0; };
 	Vector2::Vector2(float a, float b) { x = a; y = b; };
+
+	friend std::ostream& operator<<(std::ostream& out, const Vector2& vec)
+	{
+		out << "[" << vec.x << "," << vec.y << "]";
+		return out;
+	}
+	
+	std::string ToString()
+	{
+		return "[" + std::to_string(x) + "," + std::to_string(y) + "]";
+	}
 };
 
 class Unit

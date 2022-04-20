@@ -28,6 +28,8 @@ void render();
 
 static Uint32 next_time;
 
+int once = 0;
+
 Uint32 time_left(void)
 {
 	Uint32 now;
@@ -323,16 +325,16 @@ int main(int argc, const char** argv, const char** argz)
 	
 	p1 = new PlayerUser(flags, 1, 100);
 	p2 = new PlayerUser(flags, 2, 1300);
-	serverPlayer = new PlayerUser(flags, 0, 1920/2-500);
+	serverPlayer = new PlayerUser(flags, 0, 1920/2-250);
 
 	OutputWindow servWin, clientWin;
 	std::thread st([&servWin]()
 	{
-		serverPlayer->initTcpServer("8080");
+		p1->initTcpServer("8080");
 	});
-	std::thread player1Client([&servWin]()
+	std::thread player1Client([&clientWin]()
 	{
-		p1->initTcpClient("4150", "8080");
+		serverPlayer->initTcpClient("7077", "8080");
 	});
 
 
@@ -354,10 +356,6 @@ int main(int argc, const char** argv, const char** argz)
 	int w, h;
 	SDL_GetWindowSize(serverPlayer->window, &w, &h);
 	serverPlayer->unitManager.createSquare(Vector2(w, h));
-	std::string msg(serverPlayer->packageUnitIntoString(0));
-	std::cout << msg;
-	serverPlayer->sendSocket->Send(msg.c_str(), msg.length());
-
 	serverPlayer->unitManager.createRectV(Vector2(w, h));
 	serverPlayer->unitManager.createRectH(Vector2(w, h));
 
@@ -433,6 +431,14 @@ void update(float dt)
 
 	SDL_GetWindowSize(p2->window, &w, &h);
 	p2->unitManager.updateUnits(dt, Vector2(w, h));
+
+
+	once++;
+	if (once == 100)
+	{
+		std::string msg(serverPlayer->packageUnitIntoString(0));
+		serverPlayer->sendSocket->Send(msg.c_str(), msg.length());
+	}
 
 
 	/*unit0.update(dt, Vector2(w, h));

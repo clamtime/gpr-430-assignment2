@@ -1,5 +1,6 @@
 #pragma once
 #include <SDL_stdinc.h>
+#include <ostream>
 
 struct Color
 {
@@ -45,5 +46,16 @@ struct Color
 
 		if (b > 255)
 			b = 0;
+	}
+
+	friend std::ostream& operator<<(std::ostream& out, const Color& col)
+	{
+		out << "[" << col.r << "," << col.g << "," << col.b << "," << col.a << "]";
+		return out;
+	}
+
+	std::string ToString()
+	{
+		return "[" + std::to_string(r) + "," + std::to_string(g) + "," + std::to_string(b) + "," + std::to_string(a) + "]";
 	}
 };

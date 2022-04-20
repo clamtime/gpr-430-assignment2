@@ -24,6 +24,6 @@ struct PlayerUser
 	void initTcpServer(std::string listenPort);
 
 	std::string packageUnitIntoString(int _id);
-	void decodeUnitString(std::string _unitString);
+	void decodeUnitString(std::string _unitString, bool onlyPrint = false);
 	void recieveNewUnit(int _id, int _type, Vector2 _pos, Vector2 _size, Color _col);
 };
