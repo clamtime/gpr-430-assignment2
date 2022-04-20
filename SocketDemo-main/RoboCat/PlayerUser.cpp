@@ -187,6 +187,10 @@ void PlayerUser::initTcpServer(std::string listenPort)
 
 			std::string receivedMsg(buffer, bytesReceived);
 			LOG("Received message from %s: %s", incomingAddress.ToString().c_str(), receivedMsg.c_str());
+			if (receivedMsg[0] == '$')
+			{
+				decodeUnitString(receivedMsg.erase(0, 1));
+			}
 		}
 		});
 
@@ -199,7 +203,7 @@ void PlayerUser::initTcpServer(std::string listenPort)
 
 std::string PlayerUser::packageUnitIntoString(int _id)
 {
-	std::string toReturn = "";
+	std::string toReturn = "$";
 	
 	Unit* temp = unitManager.getUnit(_id);
 	if (temp != nullptr)
@@ -208,7 +212,7 @@ std::string PlayerUser::packageUnitIntoString(int _id)
 		Vector2 size = temp->getSize();
 		Color col = temp->getColor();
 
-		toReturn =
+		toReturn +=
 			std::to_string(temp->getID())   + SEPERATOR_TOKEN +
 			std::to_string(temp->getType()) + SEPERATOR_TOKEN +
 			std::to_string(pos.x)  + SEPERATOR_TOKEN +

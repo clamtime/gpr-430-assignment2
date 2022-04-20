@@ -354,6 +354,10 @@ int main(int argc, const char** argv, const char** argz)
 	int w, h;
 	SDL_GetWindowSize(serverPlayer->window, &w, &h);
 	serverPlayer->unitManager.createSquare(Vector2(w, h));
+	std::string msg(serverPlayer->packageUnitIntoString(0));
+	std::cout << msg;
+	serverPlayer->sendSocket->Send(msg.c_str(), msg.length());
+
 	serverPlayer->unitManager.createRectV(Vector2(w, h));
 	serverPlayer->unitManager.createRectH(Vector2(w, h));
 
@@ -408,6 +412,8 @@ void render()
 
 	// render units here
 	serverPlayer->unitManager.RenderUnits(serverPlayer->renderer);
+	p1->unitManager.RenderUnits(p1->renderer);
+	p2->unitManager.RenderUnits(p2->renderer);
 
 	/*unit0.render(rendererServer);
 	unit1.render(rendererServer);
@@ -420,11 +426,14 @@ void update(float dt)
 	int w, h;
 	SDL_GetWindowSize(serverPlayer->window, &w, &h);
 
-	std::string msg(serverPlayer->packageUnitIntoString(0));
-	p1->sendSocket->Send(msg.c_str(), msg.length());
-	//std::this_thread::sleep_for(std::chrono::seconds(1));
-
 	serverPlayer->unitManager.updateUnits(dt, Vector2(w, h));
+
+	SDL_GetWindowSize(p1->window, &w, &h);
+	p1->unitManager.updateUnits(dt, Vector2(w, h));
+
+	SDL_GetWindowSize(p2->window, &w, &h);
+	p2->unitManager.updateUnits(dt, Vector2(w, h));
+
 
 	/*unit0.update(dt, Vector2(w, h));
 	unit1.update(dt, Vector2(w, h));
