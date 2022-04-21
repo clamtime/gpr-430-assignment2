@@ -8,11 +8,7 @@
 #include <thread>
 #include "PlayerUser.h"
 
-//const std::string SENDPORT = "8010", RECVPORT = "9000";
-//TCPSocketPtr sendSocket = SocketUtil::CreateTCPSocket(SocketAddressFamily::INET), 
-//		     recvSocket = SocketUtil::CreateTCPSocket(SocketAddressFamily::INET);
-
-PlayerUser *p1, *p2, *serverPlayer;
+PlayerUser* p1, * p2;
 
 bool isRunning;
 bool fullscreen;
@@ -22,7 +18,6 @@ Unit unit0, unit1, unit2;
 void handleEvents();
 void update(float dt);
 void render();
-//void loadImage(std::string IMG_PATH);
 
 #define TICK_INTERVAL    30
 
@@ -41,263 +36,9 @@ Uint32 time_left(void)
 		return next_time - now;
 }
 
-//void initServer()
-//{
-//	// Create socket
-//	if (recvSocket == nullptr)
-//	{
-//		SocketUtil::ReportError("Creating listening socket");
-//		
-//	}
-//
-//	recvSocket->SetNonBlockingMode(true);
-//
-//	LOG("%s", "Listening socket created");
-//
-//	// Bind() - "Bind" socket -> tells OS we want to use a specific address
-//
-//	SocketAddressPtr listenAddress = SocketAddressFactory::CreateIPv4FromString("127.0.0.1:8080");
-//	if (listenAddress == nullptr)
-//	{
-//		SocketUtil::ReportError("Creating listen address");
-//		
-//	}
-//
-//	if (recvSocket->Bind(*listenAddress) != NO_ERROR)
-//	{
-//		SocketUtil::ReportError("Binding listening socket");
-//		// This doesn't block!
-//		
-//	}
-//
-//	LOG("%s", "Bound listening socket");
-//
-//	// Blocking function call -> Waits for some input; halts the program until something "interesting" happens
-//	// Non-Blocking function call -> Returns right away, as soon as the action is completed
-//
-//	// Listen() - Listen on socket -> Non-blocking; tells OS we care about incoming connections on this socket
-//	if (recvSocket->Listen() != NO_ERROR)
-//	{
-//		SocketUtil::ReportError("Listening on listening socket");
-//		
-//	}
-//
-//	LOG("%s", "Listening on socket");
-//
-//	// Accept() - Accept on socket -> Blocking; Waits for incoming connection and completes TCP handshake
-//
-//	LOG("%s", "Waiting to accept connections...");
-//	SocketAddress incomingAddress;
-//	TCPSocketPtr connSocket = recvSocket->Accept(incomingAddress);
-//	while (connSocket == nullptr)
-//	{
-//		connSocket = recvSocket->Accept(incomingAddress);
-//		// SocketUtil::ReportError("Accepting connection");
-//		// 
-//	}
-//
-//	LOG("Accepted connection from %s", incomingAddress.ToString().c_str());
-//
-//	char buffer[4096];
-//	int32_t bytesReceived = connSocket->Receive(buffer, 4096);
-//	while (bytesReceived < 0)
-//	{
-//		bytesReceived = connSocket->Receive(buffer, 4096);
-//	}
-//	std::string receivedMsg(buffer, bytesReceived);
-//	LOG("Received message from %s: %s", incomingAddress.ToString().c_str(), receivedMsg.c_str());
-//}
-//
-//
-//void initClient()
-//{
-//	// Create socket
-//	if (sendSocket == nullptr)
-//	{
-//		SocketUtil::ReportError("Creating client socket");
-//	}
-//
-//	LOG("%s", "Client socket created");
-//
-//	// Bind() - "Bind" socket -> tells OS we want to use a specific address
-//
-//	std::string address = StringUtils::Sprintf("127.0.0.1:%s", PORT.c_str());
-//	SocketAddressPtr clientAddress = SocketAddressFactory::CreateIPv4FromString(address.c_str());
-//	if (clientAddress == nullptr)
-//	{
-//		SocketUtil::ReportError("Creating client address");
-//		
-//	}
-//
-//	if (sendSocket->Bind(*clientAddress) != NO_ERROR)
-//	{
-//		SocketUtil::ReportError("Binding client socket");
-//		// This doesn't block!
-//		
-//	}
-//
-//	LOG("%s", "Bound client socket");
-//
-//	// Connect() -> Connect socket to remote host
-//
-//	SocketAddressPtr servAddress = SocketAddressFactory::CreateIPv4FromString("127.0.0.1:8080");
-//	if (servAddress == nullptr)
-//	{
-//		SocketUtil::ReportError("Creating server address");
-//		
-//	}
-//
-//	if (sendSocket->Connect(*servAddress) != NO_ERROR)
-//	{
-//		SocketUtil::ReportError("Connecting to server");
-//		
-//	}
-//
-//	LOG("%s", "Connected to server!");
-//}
+const std::string CLIENT_SEND_PORT = "1000", CLIENT_RECV_PORT = "2000";
+//const std::string SERVER_SEND_PORT = "2000", SERVER_RECV_PORT = "1000";
 
-//void DoTcpServer()
-//{
-//	// Create socket
-//	TCPSocketPtr listenSocket = SocketUtil::CreateTCPSocket(SocketAddressFamily::INET);
-//	if (listenSocket == nullptr)
-//	{
-//		SocketUtil::ReportError("Creating listening socket");
-//		ExitProcess(1);
-//	}
-//
-//	//listenSocket->SetNonBlockingMode(true);
-//
-//	LOG("%s", "Listening socket created");
-//
-//	// Bind() - "Bind" socket -> tells OS we want to use a specific address
-//
-//	SocketAddressPtr listenAddress = SocketAddressFactory::CreateIPv4FromString("127.0.0.1:8080");
-//	if (listenAddress == nullptr)
-//	{
-//		SocketUtil::ReportError("Creating listen address");
-//		ExitProcess(1);
-//	}
-//
-//	if (listenSocket->Bind(*listenAddress) != NO_ERROR)
-//	{
-//		SocketUtil::ReportError("Binding listening socket");
-//		// This doesn't block!
-//		ExitProcess(1);
-//	}
-//
-//	LOG("%s", "Bound listening socket");
-//
-//	// Blocking function call -> Waits for some input; halts the program until something "interesting" happens
-//	// Non-Blocking function call -> Returns right away, as soon as the action is completed
-//
-//	// Listen() - Listen on socket -> Non-blocking; tells OS we care about incoming connections on this socket
-//	if (listenSocket->Listen() != NO_ERROR)
-//	{
-//		SocketUtil::ReportError("Listening on listening socket");
-//		ExitProcess(1);
-//	}
-//
-//	LOG("%s", "Listening on socket");
-//
-//	// Accept() - Accept on socket -> Blocking; Waits for incoming connection and completes TCP handshake
-//
-//	LOG("%s", "Waiting to accept connections...");
-//	SocketAddress incomingAddress;
-//	TCPSocketPtr connSocket = listenSocket->Accept(incomingAddress);
-//	while (connSocket == nullptr)
-//	{
-//		connSocket = listenSocket->Accept(incomingAddress);
-//		// SocketUtil::ReportError("Accepting connection");
-//		// ExitProcess(1);
-//	}
-//
-//	LOG("Accepted connection from %s", incomingAddress.ToString().c_str());
-//
-//	bool quit = false;
-//	std::thread receiveThread([&]() { // don't use [&] :)
-//		while (!quit) // Need to add a quit here to have it really exit!
-//		{
-//			char buffer[4096];
-//			int32_t bytesReceived = connSocket->Receive(buffer, 4096);
-//			if (bytesReceived == 0)
-//			{
-//				// handle disconnect
-//			}
-//			if (bytesReceived < 0)
-//			{
-//				SocketUtil::ReportError("Receiving");
-//				return;
-//			}
-//
-//			std::string receivedMsg(buffer, bytesReceived);
-//			LOG("Received message from %s: %s", incomingAddress.ToString().c_str(), receivedMsg.c_str());
-//		}
-//		});
-//
-//	std::cout << "Press enter to exit at any time!\n";
-//	std::cin.get();
-//	quit = true;
-//	connSocket->~TCPSocket(); // Forcibly close socket (shouldn't call destructors like this -- make a new function for it!
-//	receiveThread.join();
-//}
-//
-//void DoTcpClient(std::string port)
-//{
-//	// Create socket
-//	clientSocket = SocketUtil::CreateTCPSocket(SocketAddressFamily::INET);
-//	if (clientSocket == nullptr)
-//	{
-//		SocketUtil::ReportError("Creating client socket");
-//		ExitProcess(1);
-//	}
-//
-//	LOG("%s", "Client socket created");
-//
-//	// Bind() - "Bind" socket -> tells OS we want to use a specific address
-//
-//	std::string address = StringUtils::Sprintf("127.0.0.1:%s", port.c_str());
-//	SocketAddressPtr clientAddress = SocketAddressFactory::CreateIPv4FromString(address.c_str());
-//	if (clientAddress == nullptr)
-//	{
-//		SocketUtil::ReportError("Creating client address");
-//		ExitProcess(1);
-//	}
-//
-//	if (clientSocket->Bind(*clientAddress) != NO_ERROR)
-//	{
-//		SocketUtil::ReportError("Binding client socket");
-//		// This doesn't block!
-//		ExitProcess(1);
-//	}
-//
-//	LOG("%s", "Bound client socket");
-//
-//	// Connect() -> Connect socket to remote host
-//
-//	SocketAddressPtr servAddress = SocketAddressFactory::CreateIPv4FromString("127.0.0.1:8080");
-//	if (servAddress == nullptr)
-//	{
-//		SocketUtil::ReportError("Creating server address");
-//		ExitProcess(1);
-//	}
-//
-//	if (clientSocket->Connect(*servAddress) != NO_ERROR)
-//	{
-//		SocketUtil::ReportError("Connecting to server");
-//		ExitProcess(1);
-//	}
-//
-//	LOG("%s", "Connected to server!");
-//
-//	//while (true)
-//	//{
-//	//	LOG("%s", "Client sending message");
-//	//	std::string msg("Hello server! How are you?");
-//	//	clientSocket->Send(msg.c_str(), msg.length());
-//	//	std::this_thread::sleep_for(std::chrono::seconds(1));
-//	//}
-//}
 
 #if _WIN32
 int main(int argc, const char** argv)
@@ -325,16 +66,16 @@ int main(int argc, const char** argv, const char** argz)
 	
 	p1 = new PlayerUser(flags, 1, 100);
 	p2 = new PlayerUser(flags, 2, 1300);
-	serverPlayer = new PlayerUser(flags, 0, 1920/2-250);
+	//serverPlayer = new PlayerUser(flags, 0, 1920/2-250);
 
-	OutputWindow servWin, clientWin;
-	std::thread st([&servWin]()
-	{
-		p1->initTcpServer("8080");
+	OutputWindow p1Client,p2Client;
+	std::thread p1c([&p1Client]()
+	{	
+		p1->initTcpClient(CLIENT_SEND_PORT, CLIENT_RECV_PORT);
 	});
-	std::thread player1Client([&clientWin]()
+	std::thread p2c([&p2Client]()
 	{
-		serverPlayer->initTcpClient("7077", "8080");
+		p2->initTcpClient(CLIENT_SEND_PORT, CLIENT_RECV_PORT);
 	});
 
 
@@ -345,19 +86,12 @@ int main(int argc, const char** argv, const char** argz)
 	color1 = Color(61, 226, 255, 255);
 	color2 = Color(155, 132, 245, 255);
 
-	// init units
-	/*unit0 = Unit(Vector2(100, 100), Vector2(75, 75), 0, color0);
-	unit1 = Unit(Vector2(250, 250), Vector2(40, 70), 1, color1);
-	unit2 = Unit(Vector2(50, 250), Vector2(70, 40), 2, color2);*/
-
-	// UnitManager
-
 
 	int w, h;
-	SDL_GetWindowSize(serverPlayer->window, &w, &h);
-	serverPlayer->unitManager.createSquare(Vector2(w, h));
-	serverPlayer->unitManager.createRectV(Vector2(w, h));
-	serverPlayer->unitManager.createRectH(Vector2(w, h));
+	SDL_GetWindowSize(p1->window, &w, &h);
+	p1->unitManager.createSquare(Vector2(w, h));
+	p1->unitManager.createRectV(Vector2(w, h));
+	p2->unitManager.createRectH(Vector2(w, h));
 
 	isRunning = true;
 
@@ -380,7 +114,7 @@ int main(int argc, const char** argv, const char** argz)
 
 	delete p1;
 	delete p2;
-	delete serverPlayer;
+	//delete serverPlayer;
 	SocketUtil::CleanUp();
 
 	return 0;
@@ -404,28 +138,21 @@ void handleEvents()
 
 void render() 
 {
-	SDL_SetRenderDrawColor(serverPlayer->renderer, 121, 121, 121, 255);
-	SDL_RenderClear(serverPlayer->renderer);
-	SDL_RenderPresent(serverPlayer->renderer);
-
-	// render units here
-	serverPlayer->unitManager.RenderUnits(serverPlayer->renderer);
+	SDL_SetRenderDrawColor(p1->renderer, 121, 121, 121, 255);
+	SDL_RenderClear(p1->renderer);
+	SDL_RenderPresent(p1->renderer);
 	p1->unitManager.RenderUnits(p1->renderer);
-	p2->unitManager.RenderUnits(p2->renderer);
 
-	/*unit0.render(rendererServer);
-	unit1.render(rendererServer);
-	unit2.render(rendererServer);*/
+	SDL_SetRenderDrawColor(p2->renderer, 121, 121, 121, 255);
+	SDL_RenderClear(p2->renderer);
+	SDL_RenderPresent(p2->renderer);
+	p2->unitManager.RenderUnits(p2->renderer);
 }
 
 //simple update function
 void update(float dt) 
 {
 	int w, h;
-	SDL_GetWindowSize(serverPlayer->window, &w, &h);
-
-	serverPlayer->unitManager.updateUnits(dt, Vector2(w, h));
-
 	SDL_GetWindowSize(p1->window, &w, &h);
 	p1->unitManager.updateUnits(dt, Vector2(w, h));
 
@@ -436,12 +163,15 @@ void update(float dt)
 	once++;
 	if (once == 100)
 	{
-		std::string msg(serverPlayer->packageUnitIntoString(0));
-		serverPlayer->sendSocket->Send(msg.c_str(), msg.length());
+		std::string msg(p1->packageUnitIntoString(p1->unitManager.units[0].getID()));
+		p1->sendSocket->Send(msg.c_str(), msg.length());
+
+		msg = p1->packageUnitIntoString(p1->unitManager.units[1].getID());
+		p1->sendSocket->Send(msg.c_str(), msg.length());
 	}
-
-
-	/*unit0.update(dt, Vector2(w, h));
-	unit1.update(dt, Vector2(w, h));
-	unit2.update(dt, Vector2(w, h));*/
+	else if (once == 120)
+	{
+		std::string msg = p1->packageUnitIntoString(p2->unitManager.units[0].getID());
+		p2->recvSocket->Send(msg.c_str(), msg.length());
+	}
 }

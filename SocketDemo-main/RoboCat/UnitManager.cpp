@@ -30,7 +30,7 @@ void UnitManager::createSquare(Vector2 screen)
 	int size = GetRandInt(20, 121)    ;
 	Color col = colors.at(GetRandInt(0, colors.size()));
 
-	Unit temp = Unit(Vector2(posx, posy), Vector2(size, size), 0, col, count);
+	Unit temp = Unit(Vector2(posx, posy), Vector2(size, size), 0, col, GetRandUnitInt(0,1000));
 	units.push_back(temp);
 	count++;
 }
@@ -43,7 +43,7 @@ void UnitManager::createRectV(Vector2 screen)
 	int sizey = GetRandInt(40, 61);
 	Color col = colors.at(GetRandInt(0, colors.size()));
 
-	Unit temp = Unit(Vector2(posx, posy), Vector2(sizex, sizey), 1, col, count);
+	Unit temp = Unit(Vector2(posx, posy), Vector2(sizex, sizey), 1, col, GetRandUnitInt(0, 1000));
 	units.push_back(temp);
 	count++;
 }
@@ -56,7 +56,7 @@ void UnitManager::createRectH(Vector2 screen)
 	int sizey = GetRandInt(40, 60);
 	Color col = colors.at(GetRandInt(0, colors.size()));
 
-	Unit temp = Unit(Vector2(posx, posy), Vector2(sizex, sizey), 0, col, count);
+	Unit temp = Unit(Vector2(posx, posy), Vector2(sizex, sizey), 2, col, GetRandUnitInt(0, 1000));
 	units.push_back(temp);
 	count++;
 }
@@ -88,6 +88,26 @@ void UnitManager::RenderUnits(SDL_Renderer* renderer)
 int UnitManager::GetRandInt(int min, int max)
 {
 	int r = std::rand() % max + min;
+	return r;
+}
+
+int UnitManager::GetRandUnitInt(int min, int max)
+{
+	int r = std::rand() % max + min;
+	bool validID = true;
+	for (int i = 0; i < count; i++)
+		if (units[i].getID() == r)
+			validID = false;
+
+	while (!validID)
+	{
+		validID = true;
+		r = std::rand() % max + min;
+		for (int i = 0; i < count; i++)
+			if (units[i].getID() == r)
+				validID = false;
+	}
+
 	return r;
 }
 

@@ -35,6 +35,8 @@ public:
 	void RenderUnits(SDL_Renderer* renderer);
 
 	int GetRandInt(int min, int max);
+	
+	int GetRandUnitInt(int min, int max);
 
 	Unit* getUnit(int id);
 };

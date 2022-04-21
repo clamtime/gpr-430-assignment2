@@ -230,6 +230,9 @@ std::string PlayerUser::packageUnitIntoString(int _id)
 
 void PlayerUser::decodeUnitString(std::string _unitString, bool onlyPrint)
 {
+	if (_unitString.length() == 0)
+		return;
+
 	vector<std::string> splitUnitString;
 
 	if (_unitString[0] == '$')
