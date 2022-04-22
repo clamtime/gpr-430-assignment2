@@ -36,7 +36,7 @@ Uint32 time_left(void)
 		return next_time - now;
 }
 
-const std::string CLIENT_SEND_PORT = "1000", CLIENT_RECV_PORT = "2000";
+std::string CLIENT_SEND_PORT = "1250", CLIENT_RECV_PORT = "2250";
 //const std::string SERVER_SEND_PORT = "2000", SERVER_RECV_PORT = "1000";
 
 
@@ -68,6 +68,9 @@ int main(int argc, const char** argv, const char** argz)
 	p2 = new PlayerUser(flags, 2, 1300);
 	//serverPlayer = new PlayerUser(flags, 0, 1920/2-250);
 
+	CLIENT_SEND_PORT = std::to_string(rand() % 1000 + 8999);
+	CLIENT_RECV_PORT = std::to_string(rand() % 1000 + 8999);
+
 	OutputWindow p1Client,p2Client;
 	std::thread p1c([&p1Client]()
 	{	
@@ -75,7 +78,7 @@ int main(int argc, const char** argv, const char** argz)
 	});
 	std::thread p2c([&p2Client]()
 	{
-		p2->initTcpClient(CLIENT_SEND_PORT, CLIENT_RECV_PORT);
+		p2->initTcpServer(CLIENT_RECV_PORT);
 	});
 
 
@@ -171,7 +174,7 @@ void update(float dt)
 	}
 	else if (once == 120)
 	{
-		std::string msg = p1->packageUnitIntoString(p2->unitManager.units[0].getID());
-		p2->recvSocket->Send(msg.c_str(), msg.length());
+		std::string msg = p2->packageUnitIntoString(p2->unitManager.units[0].getID());
+		p2->recvConnSocket->Send(msg.c_str(), msg.length());
 	}
 }

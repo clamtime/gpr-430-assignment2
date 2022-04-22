@@ -109,19 +109,50 @@ void PlayerUser::initTcpClient(std::string sendPort, std::string recvPort)
 	}
 
 	LOG("%s", "Connected to server!");
+
+	bool quit = false;
+	std::thread receiveNewThread([&]() { // don't use [&] :)
+		while (!quit) // Need to add a quit here to have it really exit!
+		{
+			char buffer[4096];
+			int32_t bytesReceived = sendSocket->Receive(buffer, 4096);
+			if (bytesReceived == 0)
+			{
+				// handle disconnect
+			}
+			if (bytesReceived < 0)
+			{
+				SocketUtil::ReportError("Receiving");
+				return;
+			}
+
+			std::string receivedMsg(buffer, bytesReceived);
+			LOG("Received message: %s", receivedMsg.c_str());
+			if (receivedMsg[0] == '$')
+			{
+				decodeUnitString(receivedMsg.erase(0, 1));
+			}
+		}
+		});
+
+	std::cout << "Press enter to exit at any time!\n";
+	std::cin.get();
+	quit = true;
+	recvConnSocket->~TCPSocket(); // Forcibly close socket (shouldn't call destructors like this -- make a new function for it!
+	receiveNewThread.join();
 }
 
 void PlayerUser::initTcpServer(std::string listenPort)
 {
 	// Create socket
-	TCPSocketPtr listenSocket = SocketUtil::CreateTCPSocket(SocketAddressFamily::INET);
-	if (listenSocket == nullptr)
+	recvSocket = SocketUtil::CreateTCPSocket(SocketAddressFamily::INET);
+	if (recvSocket == nullptr)
 	{
 		SocketUtil::ReportError("Creating listening socket");
 		ExitProcess(1);
 	}
 
-	//listenSocket->SetNonBlockingMode(true);
+	//recvSocket->SetNonBlockingMode(true);
 
 	LOG("%s", "Listening socket created");
 
@@ -134,7 +165,7 @@ void PlayerUser::initTcpServer(std::string listenPort)
 		ExitProcess(1);
 	}
 
-	if (listenSocket->Bind(*listenAddress) != NO_ERROR)
+	if (recvSocket->Bind(*listenAddress) != NO_ERROR)
 	{
 		SocketUtil::ReportError("Binding listening socket");
 		// This doesn't block!
@@ -147,7 +178,7 @@ void PlayerUser::initTcpServer(std::string listenPort)
 	// Non-Blocking function call -> Returns right away, as soon as the action is completed
 
 	// Listen() - Listen on socket -> Non-blocking; tells OS we care about incoming connections on this socket
-	if (listenSocket->Listen() != NO_ERROR)
+	if (recvSocket->Listen() != NO_ERROR)
 	{
 		SocketUtil::ReportError("Listening on listening socket");
 		ExitProcess(1);
@@ -159,10 +190,10 @@ void PlayerUser::initTcpServer(std::string listenPort)
 
 	LOG("%s", "Waiting to accept connections...");
 	SocketAddress incomingAddress;
-	TCPSocketPtr connSocket = listenSocket->Accept(incomingAddress);
-	while (connSocket == nullptr)
+	recvConnSocket = recvSocket->Accept(incomingAddress);
+	while (recvConnSocket == nullptr)
 	{
-		connSocket = listenSocket->Accept(incomingAddress);
+		recvConnSocket = recvSocket->Accept(incomingAddress);
 		// SocketUtil::ReportError("Accepting connection");
 		// ExitProcess(1);
 	}
@@ -174,7 +205,7 @@ void PlayerUser::initTcpServer(std::string listenPort)
 		while (!quit) // Need to add a quit here to have it really exit!
 		{
 			char buffer[4096];
-			int32_t bytesReceived = connSocket->Receive(buffer, 4096);
+			int32_t bytesReceived = recvConnSocket->Receive(buffer, 4096);
 			if (bytesReceived == 0)
 			{
 				// handle disconnect
@@ -197,7 +228,7 @@ void PlayerUser::initTcpServer(std::string listenPort)
 	std::cout << "Press enter to exit at any time!\n";
 	std::cin.get();
 	quit = true;
-	connSocket->~TCPSocket(); // Forcibly close socket (shouldn't call destructors like this -- make a new function for it!
+	recvConnSocket->~TCPSocket(); // Forcibly close socket (shouldn't call destructors like this -- make a new function for it!
 	receiveThread.join();
 }
 

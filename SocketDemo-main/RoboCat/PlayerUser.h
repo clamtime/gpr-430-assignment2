@@ -14,7 +14,7 @@ struct PlayerUser
 	std::string SEPERATOR_TOKEN = "!";
 
 
-	TCPSocketPtr sendSocket, recvSocket;
+	TCPSocketPtr sendSocket, recvSocket, recvConnSocket;
 
 	PlayerUser();
 	PlayerUser(int _flags, int _pnum, int _xpos);
