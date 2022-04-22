@@ -134,6 +134,15 @@ void handleEvents()
 	case SDL_QUIT:
 		isRunning = false;
 		break;
+	case SDL_KEYDOWN:
+		if (event.key.keysym.sym == SDLK_j)
+		{
+			std::cout << "Create rand unit here" << (event.window.windowID == SDL_GetWindowID(p1->window) ? " FROM P1" : " FROM P2") << std::endl;
+		}
+		else if (event.key.keysym.sym == SDLK_k)
+		{
+			std::cout << "Delete rand unit here" << (event.window.windowID == SDL_GetWindowID(p1->window) ? " FROM P1" : " FROM P2") << std::endl;
+		}
 	default:
 		break;
 	}
@@ -166,15 +175,11 @@ void update(float dt)
 	once++;
 	if (once == 100)
 	{
-		std::string msg(p1->packageUnitIntoString(p1->unitManager.units[0].getID()));
-		p1->sendSocket->Send(msg.c_str(), msg.length());
-
-		msg = p1->packageUnitIntoString(p1->unitManager.units[1].getID());
-		p1->sendSocket->Send(msg.c_str(), msg.length());
+		p1->sendUnitIterator(0);
+		p1->sendUnitIterator(1);
 	}
 	else if (once == 120)
 	{
-		std::string msg = p2->packageUnitIntoString(p2->unitManager.units[0].getID());
-		p2->recvConnSocket->Send(msg.c_str(), msg.length());
+		p2->sendUnitIterator(0);
 	}
 }

@@ -12,7 +12,7 @@ struct PlayerUser
 	int playerNumber;
 	std::string playerName;
 	std::string SEPERATOR_TOKEN = "!";
-
+	int sendRecvFlag = -1;
 
 	TCPSocketPtr sendSocket, recvSocket, recvConnSocket;
 
@@ -25,5 +25,6 @@ struct PlayerUser
 
 	std::string packageUnitIntoString(int _id);
 	void decodeUnitString(std::string _unitString, bool onlyPrint = false);
+	void sendUnitIterator(int _it);
 	void recieveNewUnit(int _id, int _type, Vector2 _pos, Vector2 _size, Color _col);
 };

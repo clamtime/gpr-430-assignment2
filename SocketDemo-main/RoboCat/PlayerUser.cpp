@@ -62,8 +62,9 @@ PlayerUser::~PlayerUser()
 }
 
 void PlayerUser::initTcpClient(std::string sendPort, std::string recvPort)
-
 {
+	sendRecvFlag = 0;
+
 	// Create socket
 	sendSocket = SocketUtil::CreateTCPSocket(SocketAddressFamily::INET);
 	if (sendSocket == nullptr)
@@ -144,6 +145,7 @@ void PlayerUser::initTcpClient(std::string sendPort, std::string recvPort)
 
 void PlayerUser::initTcpServer(std::string listenPort)
 {
+	sendRecvFlag = 1;
 	// Create socket
 	recvSocket = SocketUtil::CreateTCPSocket(SocketAddressFamily::INET);
 	if (recvSocket == nullptr)
@@ -291,6 +293,20 @@ void PlayerUser::decodeUnitString(std::string _unitString, bool onlyPrint)
 			"Color: " + _col.ToString() +'\n';
 
 		std::cout << str;
+	}
+}
+
+void PlayerUser::sendUnitIterator(int _it)
+{
+	if (sendRecvFlag == 0)
+	{
+		std::string msg(packageUnitIntoString(unitManager.units[_it].getID()));
+		sendSocket->Send(msg.c_str(), msg.length());
+	}
+	else if (sendRecvFlag == 1)
+	{
+		std::string msg = packageUnitIntoString(unitManager.units[_it].getID());
+		recvConnSocket->Send(msg.c_str(), msg.length());
 	}
 }
 
