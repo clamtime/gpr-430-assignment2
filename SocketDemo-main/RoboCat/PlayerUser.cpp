@@ -310,6 +310,20 @@ void PlayerUser::sendUnitIterator(int _it)
 	}
 }
 
+void PlayerUser::sendUnitID(int _id)
+{
+	if (sendRecvFlag == 0)
+	{
+		std::string msg(packageUnitIntoString(_id));
+		sendSocket->Send(msg.c_str(), msg.length());
+	}
+	else if (sendRecvFlag == 1)
+	{
+		std::string msg = packageUnitIntoString(_id);
+		recvConnSocket->Send(msg.c_str(), msg.length());
+	}
+}
+
 void PlayerUser::recieveNewUnit(int _id, int _type, Vector2 _pos, Vector2 _size, Color _col)
 {
 	// ensure unit does not exist locally
@@ -317,4 +331,27 @@ void PlayerUser::recieveNewUnit(int _id, int _type, Vector2 _pos, Vector2 _size,
 	{
 		unitManager.createReceivedUnit(_pos, _size, _col, _type, _id);
 	}
+}
+
+int PlayerUser::createRandomUnit()
+{
+	int w, h;
+	SDL_GetWindowSize(window, &w, &h);
+	int which = rand() % 3;
+
+	int toReturn = -1;
+
+	switch (which)
+	{
+	case 0:
+		toReturn = unitManager.createSquare(Vector2(w, h));
+		break;
+	case 1:
+		toReturn = unitManager.createRectV(Vector2(w, h));
+		break;
+	case 2:
+		toReturn = unitManager.createRectH(Vector2(w, h));
+		break;
+	}
+	return toReturn;
 }

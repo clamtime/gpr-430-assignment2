@@ -12,8 +12,6 @@ PlayerUser* p1, * p2;
 
 bool isRunning;
 bool fullscreen;
-Color color0, color1, color2;
-Unit unit0, unit1, unit2;
 
 void handleEvents();
 void update(float dt);
@@ -37,7 +35,6 @@ Uint32 time_left(void)
 }
 
 std::string CLIENT_SEND_PORT = "1250", CLIENT_RECV_PORT = "2250";
-//const std::string SERVER_SEND_PORT = "2000", SERVER_RECV_PORT = "1000";
 
 
 #if _WIN32
@@ -66,7 +63,6 @@ int main(int argc, const char** argv, const char** argz)
 	
 	p1 = new PlayerUser(flags, 1, 100);
 	p2 = new PlayerUser(flags, 2, 1300);
-	//serverPlayer = new PlayerUser(flags, 0, 1920/2-250);
 
 	CLIENT_SEND_PORT = std::to_string(rand() % 1000 + 8999);
 	CLIENT_RECV_PORT = std::to_string(rand() % 1000 + 8999);
@@ -83,18 +79,6 @@ int main(int argc, const char** argv, const char** argz)
 
 
 	Uint32 lastUpdate = SDL_GetTicks();
-
-	// init colors
-	color0 = Color(200, 75, 60, 255);
-	color1 = Color(61, 226, 255, 255);
-	color2 = Color(155, 132, 245, 255);
-
-
-	int w, h;
-	SDL_GetWindowSize(p1->window, &w, &h);
-	p1->unitManager.createSquare(Vector2(w, h));
-	p1->unitManager.createRectV(Vector2(w, h));
-	p2->unitManager.createRectH(Vector2(w, h));
 
 	isRunning = true;
 
@@ -117,7 +101,6 @@ int main(int argc, const char** argv, const char** argz)
 
 	delete p1;
 	delete p2;
-	//delete serverPlayer;
 	SocketUtil::CleanUp();
 
 	return 0;
@@ -137,7 +120,13 @@ void handleEvents()
 	case SDL_KEYDOWN:
 		if (event.key.keysym.sym == SDLK_j)
 		{
-			std::cout << "Create rand unit here" << (event.window.windowID == SDL_GetWindowID(p1->window) ? " FROM P1" : " FROM P2") << std::endl;
+			bool isP1Window = event.window.windowID == SDL_GetWindowID(p1->window);
+			std::cout << "Create rand unit here" << (isP1Window ? " FROM P1" : " FROM P2") << std::endl;
+
+			int id = (isP1Window ? p1 : p2)->createRandomUnit();
+			if (id != -1)
+				(isP1Window ? p1 : p2)->sendUnitIterator(id);
+			
 		}
 		else if (event.key.keysym.sym == SDLK_k)
 		{

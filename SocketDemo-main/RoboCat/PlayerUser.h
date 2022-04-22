@@ -26,5 +26,7 @@ struct PlayerUser
 	std::string packageUnitIntoString(int _id);
 	void decodeUnitString(std::string _unitString, bool onlyPrint = false);
 	void sendUnitIterator(int _it);
+	void sendUnitID(int _id);
 	void recieveNewUnit(int _id, int _type, Vector2 _pos, Vector2 _size, Color _col);
+	int createRandomUnit();
 };

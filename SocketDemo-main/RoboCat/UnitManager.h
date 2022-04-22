@@ -22,11 +22,11 @@ public:
 
 	void createReceivedUnit(Vector2 _pos, Vector2 _size, Color _col, int _type, int _id);
 
-	void createSquare(Vector2 screen);
+	int createSquare(Vector2 screen);
 
-	void createRectV(Vector2 screen);
+	int createRectV(Vector2 screen);
 
-	void createRectH(Vector2 screen);
+	int createRectH(Vector2 screen);
 
 	void createColors();
 
@@ -39,4 +39,6 @@ public:
 	int GetRandUnitInt(int min, int max);
 
 	Unit* getUnit(int id);
+
+	int getUnitIteratorFromID(int id);
 };

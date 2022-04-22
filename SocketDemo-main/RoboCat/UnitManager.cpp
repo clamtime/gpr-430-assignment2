@@ -23,7 +23,7 @@ void UnitManager::createReceivedUnit(Vector2 _pos, Vector2 _size, Color _col, in
 	}
 }
 
-void UnitManager::createSquare(Vector2 screen)
+int UnitManager::createSquare(Vector2 screen)
 {
 	int posx = GetRandInt(0, screen.x);
 	int posy = GetRandInt(0, screen.y);
@@ -33,9 +33,10 @@ void UnitManager::createSquare(Vector2 screen)
 	Unit temp = Unit(Vector2(posx, posy), Vector2(size, size), 0, col, GetRandUnitInt(0,1000));
 	units.push_back(temp);
 	count++;
+	return temp.getID();
 }
 
-void UnitManager::createRectV(Vector2 screen)
+int UnitManager::createRectV(Vector2 screen)
 {
 	int posx = GetRandInt(0, screen.x);
 	int posy = GetRandInt(0, screen.y);
@@ -46,9 +47,10 @@ void UnitManager::createRectV(Vector2 screen)
 	Unit temp = Unit(Vector2(posx, posy), Vector2(sizex, sizey), 1, col, GetRandUnitInt(0, 1000));
 	units.push_back(temp);
 	count++;
+	return temp.getID();
 }
 
-void UnitManager::createRectH(Vector2 screen)
+int UnitManager::createRectH(Vector2 screen)
 {
 	int posx = GetRandInt(0, screen.x);
 	int posy = GetRandInt(0, screen.y);
@@ -59,6 +61,7 @@ void UnitManager::createRectH(Vector2 screen)
 	Unit temp = Unit(Vector2(posx, posy), Vector2(sizex, sizey), 2, col, GetRandUnitInt(0, 1000));
 	units.push_back(temp);
 	count++;
+	return temp.getID();
 }
 
 void UnitManager::createColors()
@@ -121,6 +124,22 @@ Unit* UnitManager::getUnit(int id)
 			toReturn = &units[i];
 			break;
 		}
+
+	return toReturn;
+}
+
+int UnitManager::getUnitIteratorFromID(int id)
+{
+	int toReturn = -1;
+
+	for (int i = 0; i < count; i++)
+	{
+		if (id == units[i].getID())
+		{
+			toReturn = i;
+			break;
+		}
+	}
 
 	return toReturn;
 }
