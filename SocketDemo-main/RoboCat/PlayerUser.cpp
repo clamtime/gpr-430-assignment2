@@ -129,9 +129,13 @@ void PlayerUser::initTcpClient(std::string sendPort, std::string recvPort)
 
 			std::string receivedMsg(buffer, bytesReceived);
 			LOG("Received message: %s", receivedMsg.c_str());
-			if (receivedMsg[0] == '$')
+			if (receivedMsg[0] == '$') // CREATE UNIT
 			{
 				decodeUnitString(receivedMsg.erase(0, 1));
+			}
+			else if (receivedMsg[0] == '!') // DELETE UNIT
+			{
+				decodeDeleteString(receivedMsg.erase(0, 1));
 			}
 		}
 		});
@@ -220,9 +224,13 @@ void PlayerUser::initTcpServer(std::string listenPort)
 
 			std::string receivedMsg(buffer, bytesReceived);
 			LOG("Received message from %s: %s", incomingAddress.ToString().c_str(), receivedMsg.c_str());
-			if (receivedMsg[0] == '$')
+			if (receivedMsg[0] == '$') // CREATE UNIT
 			{
 				decodeUnitString(receivedMsg.erase(0, 1));
+			}
+			else if (receivedMsg[0] == '!') // DELETE UNIT
+			{
+				decodeDeleteString(receivedMsg.erase(0, 1));
 			}
 		}
 		});
@@ -296,16 +304,18 @@ void PlayerUser::decodeUnitString(std::string _unitString, bool onlyPrint)
 	}
 }
 
-void PlayerUser::sendUnitIterator(int _it)
+void PlayerUser::sendUnitIterator(int _id)
 {
+	std::string msg = "";
+
 	if (sendRecvFlag == 0)
 	{
-		std::string msg(packageUnitIntoString(unitManager.units[_it].getID()));
+		msg = packageUnitIntoString(_id);
 		sendSocket->Send(msg.c_str(), msg.length());
 	}
 	else if (sendRecvFlag == 1)
 	{
-		std::string msg = packageUnitIntoString(unitManager.units[_it].getID());
+		msg = packageUnitIntoString(_id);
 		recvConnSocket->Send(msg.c_str(), msg.length());
 	}
 }
@@ -314,7 +324,7 @@ void PlayerUser::sendUnitID(int _id)
 {
 	if (sendRecvFlag == 0)
 	{
-		std::string msg(packageUnitIntoString(_id));
+		std::string msg = packageUnitIntoString(_id);
 		sendSocket->Send(msg.c_str(), msg.length());
 	}
 	else if (sendRecvFlag == 1)
@@ -354,4 +364,38 @@ int PlayerUser::createRandomUnit()
 		break;
 	}
 	return toReturn;
+}
+
+int PlayerUser::deleteRandomUnit()
+{
+	int toReturn = -1;
+
+	Unit* rand = unitManager.getRandomUnit();
+	if (rand != nullptr)
+		toReturn = rand->getID();
+
+	return toReturn;
+}
+
+void PlayerUser::sendUnitDelete(int _id)
+{
+	std::string deletePackage = "!" + std::to_string(_id);
+	if (sendRecvFlag == 0)
+	{
+		std::string msg = deletePackage;
+		sendSocket->Send(msg.c_str(), msg.length());
+	}
+	else if (sendRecvFlag == 1)
+	{
+		std::string msg = deletePackage;
+		recvConnSocket->Send(msg.c_str(), msg.length());
+	}
+}
+
+void PlayerUser::decodeDeleteString(std::string _deleteString)
+{
+	if (_deleteString.length() == 0)
+		return;
+
+	unitManager.deleteUnit(std::stoi(_deleteString));
 }

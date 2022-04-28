@@ -41,4 +41,8 @@ public:
 	Unit* getUnit(int id);
 
 	int getUnitIteratorFromID(int id);
+
+	Unit* getRandomUnit();
+
+	void deleteUnit(int id);
 };

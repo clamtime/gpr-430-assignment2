@@ -143,3 +143,21 @@ int UnitManager::getUnitIteratorFromID(int id)
 
 	return toReturn;
 }
+
+Unit* UnitManager::getRandomUnit()
+{
+	Unit* toReturn = nullptr;
+
+	if (count > 0)
+		toReturn = &units[rand() % count];
+
+	return toReturn;
+}
+
+void UnitManager::deleteUnit(int id)
+{
+	int it = getUnitIteratorFromID(id);
+	if (it != -1)
+		units.erase(units.begin() + it);
+	count--;
+}

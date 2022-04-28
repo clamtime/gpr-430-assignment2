@@ -21,7 +21,6 @@ void render();
 
 static Uint32 next_time;
 
-int once = 0;
 
 Uint32 time_left(void)
 {
@@ -118,20 +117,30 @@ void handleEvents()
 		isRunning = false;
 		break;
 	case SDL_KEYDOWN:
+	{
+		bool isP1Window = event.window.windowID == SDL_GetWindowID(p1->window);
+		PlayerUser* eventUser = (isP1Window ? p1 : p2);
+
 		if (event.key.keysym.sym == SDLK_j)
 		{
-			bool isP1Window = event.window.windowID == SDL_GetWindowID(p1->window);
-			std::cout << "Create rand unit here" << (isP1Window ? " FROM P1" : " FROM P2") << std::endl;
+			std::cout << "Create rand unit here" << " FROM " << (eventUser->playerName) << std::endl;
 
-			int id = (isP1Window ? p1 : p2)->createRandomUnit();
+			int id = eventUser->createRandomUnit();
 			if (id != -1)
-				(isP1Window ? p1 : p2)->sendUnitIterator(id);
-			
+				eventUser->sendUnitIterator(id);
 		}
 		else if (event.key.keysym.sym == SDLK_k)
 		{
-			std::cout << "Delete rand unit here" << (event.window.windowID == SDL_GetWindowID(p1->window) ? " FROM P1" : " FROM P2") << std::endl;
+			std::cout << "Delete rand unit here" << " FROM " << (eventUser->playerName) << std::endl;
+
+			int id = eventUser->deleteRandomUnit();
+			if (id != -1)
+			{
+				eventUser->sendUnitDelete(id);
+				eventUser->unitManager.deleteUnit(id);
+			}
 		}
+	}
 	default:
 		break;
 	}
@@ -159,16 +168,4 @@ void update(float dt)
 
 	SDL_GetWindowSize(p2->window, &w, &h);
 	p2->unitManager.updateUnits(dt, Vector2(w, h));
-
-
-	once++;
-	if (once == 100)
-	{
-		p1->sendUnitIterator(0);
-		p1->sendUnitIterator(1);
-	}
-	else if (once == 120)
-	{
-		p2->sendUnitIterator(0);
-	}
 }
