@@ -56,9 +56,9 @@ PlayerUser::PlayerUser(int _flags, int _pnum, int _xpos)
 
 PlayerUser::~PlayerUser()
 {
+	closeSockets();
 	SDL_DestroyRenderer(renderer);
 	SDL_DestroyWindow(window);
-	SDL_Quit();
 }
 
 void PlayerUser::initTcpClient(std::string sendPort, std::string recvPort)
@@ -111,7 +111,7 @@ void PlayerUser::initTcpClient(std::string sendPort, std::string recvPort)
 
 	LOG("%s", "Connected to server!");
 
-	bool quit = false;
+	quit = false;
 	std::thread receiveNewThread([&]() { // don't use [&] :)
 		while (!quit) // Need to add a quit here to have it really exit!
 		{
@@ -143,7 +143,7 @@ void PlayerUser::initTcpClient(std::string sendPort, std::string recvPort)
 	std::cout << "Press enter to exit at any time!\n";
 	std::cin.get();
 	quit = true;
-	recvConnSocket->~TCPSocket(); // Forcibly close socket (shouldn't call destructors like this -- make a new function for it!
+//	recvConnSocket->~TCPSocket(); // Forcibly close socket (shouldn't call destructors like this -- make a new function for it!
 	receiveNewThread.join();
 }
 
@@ -206,7 +206,7 @@ void PlayerUser::initTcpServer(std::string listenPort)
 
 	LOG("Accepted connection from %s", incomingAddress.ToString().c_str());
 
-	bool quit = false;
+	quit = false;
 	std::thread receiveThread([&]() { // don't use [&] :)
 		while (!quit) // Need to add a quit here to have it really exit!
 		{
@@ -238,7 +238,8 @@ void PlayerUser::initTcpServer(std::string listenPort)
 	std::cout << "Press enter to exit at any time!\n";
 	std::cin.get();
 	quit = true;
-	recvConnSocket->~TCPSocket(); // Forcibly close socket (shouldn't call destructors like this -- make a new function for it!
+//	recvConnSocket->~TCPSocket(); // Forcibly close socket (shouldn't call destructors like this -- make a new function for it!
+	std::cout << "HERE!";
 	receiveThread.join();
 }
 
@@ -398,4 +399,23 @@ void PlayerUser::decodeDeleteString(std::string _deleteString)
 		return;
 
 	unitManager.deleteUnit(std::stoi(_deleteString));
+}
+
+void PlayerUser::closeSockets()
+{
+	if (sendRecvFlag == 0)
+	{
+		sendSocket->~TCPSocket();
+	}
+	else if (sendRecvFlag == 1)
+	{
+		
+		recvConnSocket->~TCPSocket();
+		recvConnSocket->~TCPSocket();
+	}
+}
+
+void PlayerUser::shutdown()
+{
+	quit = true;
 }

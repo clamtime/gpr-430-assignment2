@@ -13,6 +13,7 @@ struct PlayerUser
 	std::string playerName;
 	std::string SEPERATOR_TOKEN = "!";
 	int sendRecvFlag = -1;
+	bool quit;
 
 	TCPSocketPtr sendSocket, recvSocket, recvConnSocket;
 
@@ -32,4 +33,6 @@ struct PlayerUser
 	int deleteRandomUnit();
 	void sendUnitDelete(int _id);
 	void decodeDeleteString(std::string _deleteString);
+	void closeSockets();
+	void shutdown();
 };

@@ -98,9 +98,17 @@ int main(int argc, const char** argv, const char** argz)
 
 	//frees memory associated with renderer and window
 
-	delete p1;
+
+	p1->shutdown();
+	p1c.join();
+
+	p2->shutdown();
+	p2c.join();
+
 	delete p2;
+	delete p1;
 	SocketUtil::CleanUp();
+	SDL_Quit();
 
 	return 0;
 }
@@ -115,6 +123,7 @@ void handleEvents()
 	{
 	case SDL_QUIT:
 		isRunning = false;
+		std::system("Pause");
 		break;
 	case SDL_KEYDOWN:
 	{
@@ -140,6 +149,8 @@ void handleEvents()
 				eventUser->unitManager.deleteUnit(id);
 			}
 		}
+		else if (event.key.keysym.sym == SDLK_ESCAPE)
+			isRunning = false;
 	}
 	default:
 		break;
