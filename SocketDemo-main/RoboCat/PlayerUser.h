@@ -14,6 +14,8 @@ struct PlayerUser
 	std::string SEPERATOR_TOKEN = "!";
 	int sendRecvFlag = -1;
 	bool quit;
+	float delayTimer = 0;
+
 
 	TCPSocketPtr sendSocket, recvSocket, recvConnSocket;
 

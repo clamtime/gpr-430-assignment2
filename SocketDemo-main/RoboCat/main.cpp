@@ -37,6 +37,7 @@ Uint32 time_left(void)
 
 std::string CLIENT_SEND_PORT = "1250", CLIENT_RECV_PORT = "2250";
 
+std::thread sendThread1, sendThread2, delThread1, delThread2;
 
 #if _WIN32
 int main(int argc, const char** argv)
@@ -134,22 +135,31 @@ void handleEvents()
 
 		if (event.key.keysym.sym == SDLK_j)
 		{
+			if (sendThread1.joinable())
+				sendThread1.join();
+			if (sendThread2.joinable())
+				sendThread2.join();
+
 			std::cout << "Create rand unit here" << " FROM " << (eventUser->playerName) << std::endl;
 
 			int id = eventUser->createRandomUnit();
 			if (id != -1)
-				delaySendUnitIterator(id, eventUser);
+				(sendThread1.joinable() ? sendThread2 : sendThread1) = std::thread(delaySendUnitIterator, id, eventUser);		
 				//eventUser->sendUnitIterator(id);
 		}
 		else if (event.key.keysym.sym == SDLK_k)
 		{
+			if (delThread1.joinable())
+				delThread1.join();
+			if (delThread2.joinable())
+				delThread2.join();
+
 			std::cout << "Delete rand unit here" << " FROM " << (eventUser->playerName) << std::endl;
 
 			int id = eventUser->deleteRandomUnit();
 			if (id != -1)
 			{
-				delaySendUnitDelete(id, eventUser);
-				//eventUser->sendUnitDelete(id);
+				(delThread1.joinable() ? delThread2 : delThread1) = std::thread(delaySendUnitDelete, id, eventUser);
 				eventUser->unitManager.deleteUnit(id);
 			}
 		}
@@ -187,14 +197,14 @@ void update(float dt)
 
 void delaySendUnitIterator(int _id, PlayerUser* user)
 {
-	int delay = std::rand() % 1000;
-	SDL_Delay(delay);
+	int delay = std::rand() % 100 + 900;
+	std::this_thread::sleep_for(std::chrono::milliseconds(delay));
 	user->sendUnitIterator(_id);
 }
 
 void delaySendUnitDelete(int _id, PlayerUser* user)
 {
-	int delay = std::rand() % 1000;
-	SDL_Delay(delay);
+	int delay = std::rand() % 100 + 900;
+	std::this_thread::sleep_for(std::chrono::milliseconds(delay));
 	user->sendUnitDelete(_id);
 }
