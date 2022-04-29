@@ -16,6 +16,8 @@ bool fullscreen;
 void handleEvents();
 void update(float dt);
 void render();
+void delaySendUnitIterator(int _id, PlayerUser* user);
+void delaySendUnitDelete(int _id, PlayerUser* user);
 
 #define TICK_INTERVAL    30
 
@@ -136,7 +138,8 @@ void handleEvents()
 
 			int id = eventUser->createRandomUnit();
 			if (id != -1)
-				eventUser->sendUnitIterator(id);
+				delaySendUnitIterator(id, eventUser);
+				//eventUser->sendUnitIterator(id);
 		}
 		else if (event.key.keysym.sym == SDLK_k)
 		{
@@ -145,7 +148,8 @@ void handleEvents()
 			int id = eventUser->deleteRandomUnit();
 			if (id != -1)
 			{
-				eventUser->sendUnitDelete(id);
+				delaySendUnitDelete(id, eventUser);
+				//eventUser->sendUnitDelete(id);
 				eventUser->unitManager.deleteUnit(id);
 			}
 		}
@@ -179,4 +183,18 @@ void update(float dt)
 
 	SDL_GetWindowSize(p2->window, &w, &h);
 	p2->unitManager.updateUnits(dt, Vector2(w, h));
+}
+
+void delaySendUnitIterator(int _id, PlayerUser* user)
+{
+	int delay = std::rand() % 1000;
+	SDL_Delay(delay);
+	user->sendUnitIterator(_id);
+}
+
+void delaySendUnitDelete(int _id, PlayerUser* user)
+{
+	int delay = std::rand() % 1000;
+	SDL_Delay(delay);
+	user->sendUnitDelete(_id);
 }

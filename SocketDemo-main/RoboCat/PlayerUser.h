@@ -35,4 +35,5 @@ struct PlayerUser
 	void decodeDeleteString(std::string _deleteString);
 	void closeSockets();
 	void shutdown();
+
 };
