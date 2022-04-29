@@ -16,8 +16,7 @@ bool fullscreen;
 void handleEvents();
 void update(float dt);
 void render();
-void delaySendUnitIterator(int _id, PlayerUser* user);
-void delaySendUnitDelete(int _id, PlayerUser* user);
+void delaySend(int _id, PlayerUser* user, int flag);
 
 #define TICK_INTERVAL    30
 
@@ -138,29 +137,33 @@ void handleEvents()
 		{
 			if (sendThread1.joinable())
 				sendThread1.join();
-			if (sendThread2.joinable())
+			else if (sendThread2.joinable())
 				sendThread2.join();
+			else
+				std::cout << "WAITING FOR THREAD...\n";
 
 			std::cout << "Create rand unit here" << " FROM " << (eventUser->playerName) << std::endl;
 
 			int id = eventUser->createRandomUnit();
 			if (id != -1)
-				(sendThread1.joinable() ? sendThread2 : sendThread1) = std::thread(delaySendUnitIterator, id, eventUser);		
+				(sendThread1.joinable() ? sendThread2 : sendThread1) = std::thread(delaySend, id, eventUser, 0);		
 				//eventUser->sendUnitIterator(id);
 		}
 		else if (event.key.keysym.sym == SDLK_k)
 		{
 			if (delThread1.joinable())
 				delThread1.join();
-			if (delThread2.joinable())
+			else if (delThread2.joinable())
 				delThread2.join();
+			else 
+				std::cout << "WAITING FOR THREAD...\n";
 
 			std::cout << "Delete rand unit here" << " FROM " << (eventUser->playerName) << std::endl;
 
 			int id = eventUser->deleteRandomUnit();
 			if (id != -1)
 			{
-				(delThread1.joinable() ? delThread2 : delThread1) = std::thread(delaySendUnitDelete, id, eventUser);
+				(delThread1.joinable() ? delThread2 : delThread1) = std::thread(delaySend, id, eventUser, 1);
 				eventUser->unitManager.deleteUnit(id);
 			}
 		}
@@ -196,7 +199,7 @@ void update(float dt)
 	p2->unitManager.updateUnits(dt, Vector2(w, h));
 }
 
-void delaySendUnitIterator(int _id, PlayerUser* user)
+void delaySend(int _id, PlayerUser* user, int flag)
 {
 	srand(_id);
 	int delay = std::rand() % 1000;
@@ -205,7 +208,7 @@ void delaySendUnitIterator(int _id, PlayerUser* user)
 	{
 		std::cout << "Lagging for " << delay << " ms while sending data\n";
 		std::this_thread::sleep_for(std::chrono::milliseconds(delay));
-		user->sendUnitIterator(_id);
+		flag == 0 ? user->sendUnitIterator(_id) : user->sendUnitDelete(_id);
 	}
 	else
 	{
@@ -216,31 +219,7 @@ void delaySendUnitIterator(int _id, PlayerUser* user)
 			std::this_thread::sleep_for(std::chrono::seconds(1));
 			std::cout << "Trying again...\n";
 		}
-		user->sendUnitIterator(_id);
+		flag == 0 ? user->sendUnitIterator(_id) : user->sendUnitDelete(_id);
 	}
 }
 
-void delaySendUnitDelete(int _id, PlayerUser* user)
-{	
-	srand(_id);
-	int delay = std::rand() %  1000;
-	int shouldDrop = std::rand() % 6 + 1;
-
-	if (shouldDrop != 5)
-	{
-		std::cout << "Lagging for " << delay << " ms while sending data\n";
-		std::this_thread::sleep_for(std::chrono::milliseconds(delay));
-		user->sendUnitDelete(_id);
-	}
-	else
-	{
-		while (shouldDrop == 5)
-		{
-			std::cout << "Dropped! Waiting one second before trying again...\n";
-			shouldDrop = std::rand() % 10 + 1;
-			std::this_thread::sleep_for(std::chrono::seconds(1));
-			std::cout << "Trying again...\n";
-		}
-		user->sendUnitDelete(_id);
-	}
-}
