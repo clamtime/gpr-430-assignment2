@@ -56,6 +56,7 @@ int main(int argc, const char** argv, const char** argz)
 
 	SocketUtil::StaticInit();
 
+
 	fullscreen = false;
 	int flags = 0;
 	flags = SDL_WINDOW_RESIZABLE;
@@ -197,14 +198,49 @@ void update(float dt)
 
 void delaySendUnitIterator(int _id, PlayerUser* user)
 {
-	int delay = std::rand() % 100 + 900;
-	std::this_thread::sleep_for(std::chrono::milliseconds(delay));
-	user->sendUnitIterator(_id);
+	srand(_id);
+	int delay = std::rand() % 1000;
+	int shouldDrop = std::rand() % 6 + 1;
+	if (shouldDrop != 5)
+	{
+		std::cout << "Lagging for " << delay << " ms while sending data\n";
+		std::this_thread::sleep_for(std::chrono::milliseconds(delay));
+		user->sendUnitIterator(_id);
+	}
+	else
+	{
+		while (shouldDrop == 5)
+		{
+			std::cout << "Dropped! Waiting one second before trying again...\n";
+			shouldDrop = std::rand() % 10 + 1;
+			std::this_thread::sleep_for(std::chrono::seconds(1));
+			std::cout << "Trying again...\n";
+		}
+		user->sendUnitIterator(_id);
+	}
 }
 
 void delaySendUnitDelete(int _id, PlayerUser* user)
-{
-	int delay = std::rand() % 100 + 900;
-	std::this_thread::sleep_for(std::chrono::milliseconds(delay));
-	user->sendUnitDelete(_id);
+{	
+	srand(_id);
+	int delay = std::rand() %  1000;
+	int shouldDrop = std::rand() % 6 + 1;
+
+	if (shouldDrop != 5)
+	{
+		std::cout << "Lagging for " << delay << " ms while sending data\n";
+		std::this_thread::sleep_for(std::chrono::milliseconds(delay));
+		user->sendUnitDelete(_id);
+	}
+	else
+	{
+		while (shouldDrop == 5)
+		{
+			std::cout << "Dropped! Waiting one second before trying again...\n";
+			shouldDrop = std::rand() % 10 + 1;
+			std::this_thread::sleep_for(std::chrono::seconds(1));
+			std::cout << "Trying again...\n";
+		}
+		user->sendUnitDelete(_id);
+	}
 }
